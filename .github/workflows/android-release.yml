@@ -1,0 +1,121 @@
+name: Build and Release Android APK
+
+on:
+  push:
+    branches:
+      - main
+
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+
+    steps:
+
+      # --------------------------------
+      # 1. Get source code
+      # --------------------------------
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      # --------------------------------
+      # 2. Setup Node
+      # --------------------------------
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+
+      # --------------------------------
+      # 3. Setup Expo + EAS
+      # --------------------------------
+      - name: Setup Expo and EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      # --------------------------------
+      # 4. Install dependencies
+      # --------------------------------
+      - name: Install dependencies
+        run: npm ci
+
+      # --------------------------------
+      # 5. Build APK using EAS
+      # --------------------------------
+      - name: Build Android APK
+        run: |
+          eas build \
+            --platform android \
+            --profile preview \
+            --non-interactive \
+            --wait \
+            --json > eas-build.json
+
+      # --------------------------------
+      # 6. Get APK from EAS
+      # --------------------------------
+      - name: Download APK
+        run: |
+          BUILD_URL=$(jq -r '
+            if type == "array"
+            then .[0].artifacts.buildUrl
+            else .artifacts.buildUrl
+            end
+          ' eas-build.json)
+
+          echo "EAS Build URL: $BUILD_URL"
+
+          if [ -z "$BUILD_URL" ] || [ "$BUILD_URL" = "null" ]; then
+            echo "Could not find APK download URL."
+            cat eas-build.json
+            exit 1
+          fi
+
+          curl -L "$BUILD_URL" -o ERPRR.apk
+
+      # --------------------------------
+      # 7. Verify APK exists
+      # --------------------------------
+      - name: Verify APK
+        run: |
+          ls -lh ERPRR.apk
+          test -s ERPRR.apk
+
+      # --------------------------------
+      # 8. Create GitHub Release
+      # --------------------------------
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="build-${{ github.run_number }}"
+
+          gh release create "$TAG" \
+            ERPRR.apk \
+            --title "ERPRR Mobile Build ${{ github.run_number }}" \
+            --notes "Automated Android APK build.
+
+          Commit: ${{ github.sha }}
+
+          Download the latest version from:
+          https://github.com/${{ github.repository }}/releases/latest/download/ERPRR.apk" \
+            --target "${{ github.sha }}" \
+            --latest
+
+      # --------------------------------
+      # 9. Show final download URL
+      # --------------------------------
+      - name: Show APK download URL
+        run: |
+          echo "========================================="
+          echo "APK RELEASED SUCCESSFULLY"
+          echo "========================================="
+          echo "https://github.com/${{ github.repository }}/releases/latest/download/ERPRR.apk"
+          echo "========================================="
