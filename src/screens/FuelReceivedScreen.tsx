@@ -14,7 +14,7 @@ export default function FuelReceivedScreen() {
   const [items, setItems] = useState<FuelReceived[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [updatingId, setUpdatingId] = useState<string | number | null>(null);
+  const [updatingId, setUpdatingId] = useState<string | null>(null);
 
   const load = useCallback(async (showLoader = true) => {
     if (!user?.employeeCode) return;
@@ -34,12 +34,11 @@ export default function FuelReceivedScreen() {
 
   const markReceived = async (item: FuelReceived) => {
     if (!user?.employeeCode) return;
-    const id = item.fuelReceivedId ?? item.id;
     try {
-      setUpdatingId(id ?? null);
-      await markFuelAsReceived(item, user.employeeCode);
+      setUpdatingId(item.fuelIssueId);
+      await markFuelAsReceived(item.fuelIssueId);
       setItems(current => current.map(row =>
-        (row.fuelReceivedId ?? row.id) === id ? { ...row, status: 'RECEIVED', receivedBy: user.employeeCode } : row,
+        row.fuelIssueId === item.fuelIssueId ? { ...row, isReceived: true, receivedBy: user.employeeCode } : row,
       ));
     } catch (error: any) {
       Alert.alert('Update failed', error?.response?.data?.message ?? error?.message ?? 'Request failed.');
@@ -54,30 +53,31 @@ export default function FuelReceivedScreen() {
     <SafeAreaView style={styles.safe}>
       <FlatList
         data={items}
-        keyExtractor={(item, index) => String(item.fuelReceivedId ?? item.id ?? index)}
+        keyExtractor={(item, index) => item.fuelIssueId ?? String(index)}
         contentContainerStyle={items.length ? styles.list : styles.emptyList}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(false); }} />}
-        ListEmptyComponent={<Text style={styles.empty}>No fuel received entries are assigned to you.</Text>}
+        ListEmptyComponent={<Text style={styles.empty}>No fuel issues are assigned to you.</Text>}
         renderItem={({ item }) => {
-          const id = item.fuelReceivedId ?? item.id;
-          const isReceived = String(item.status ?? '').toUpperCase() === 'RECEIVED';
-          const busy = updatingId === id;
+          const isReceived = !!item.isReceived;
+          const busy = updatingId === item.fuelIssueId;
           return (
             <View style={styles.card}>
               <View style={styles.rowBetween}>
-                <Text style={styles.title}>{display(item.fuelType, 'Fuel Delivery')}</Text>
+                <Text style={styles.title}>{display(item.fuelType, 'Fuel Issue')}</Text>
                 <View style={[styles.status, isReceived ? styles.statusDone : styles.statusPending]}>
                   <Text style={[styles.statusText, isReceived ? styles.statusDoneText : styles.statusPendingText]}>
-                    {isReceived ? 'RECEIVED' : display(item.status, 'PENDING')}
+                    {isReceived ? 'RECEIVED' : 'PENDING'}
                   </Text>
                 </View>
               </View>
 
-              <Text style={styles.quantity}>{display(item.quantity ?? item.amount)} <Text style={styles.unit}>units</Text></Text>
-              <Text style={styles.meta}>Date: {display(item.receivedDate ?? item.date)}</Text>
-              <Text style={styles.meta}>Supplier: {display(item.supplier)}</Text>
-              <Text style={styles.meta}>Vehicle: {display(item.vehicleNumber)}</Text>
-              <Text style={styles.meta}>Reference: {display(item.referenceNo)}</Text>
+              <Text style={styles.quantity}>{display(item.quantity)} <Text style={styles.unit}>units</Text></Text>
+              <Text style={styles.meta}>Issue Code: {display(item.fuelIssueCode)}</Text>
+              <Text style={styles.meta}>Issued Date: {display(item.issuedDate)}</Text>
+              <Text style={styles.meta}>Project: {display(item.projectCode)}</Text>
+              <Text style={styles.meta}>Issued By: {display(item.issuedBy)}</Text>
+              <Text style={styles.meta}>Asset Code: {display(item.assetCode)}</Text>
+              {!!item.remarks && <Text style={styles.remarks}>{item.remarks}</Text>}
 
               {!isReceived && (
                 <Pressable disabled={busy} onPress={() => markReceived(item)} style={[styles.receiveButton, busy && styles.disabled]}>
@@ -104,6 +104,7 @@ const styles = StyleSheet.create({
   quantity: { fontSize: 25, fontWeight: '900', color: '#176B4D', marginVertical: 2 },
   unit: { fontSize: 12, color: '#727A76', fontWeight: '600' },
   meta: { color: '#6E7672', fontSize: 13 },
+  remarks: { marginTop: 4, borderTopWidth: 1, borderTopColor: '#EDF0EE', paddingTop: 10, color: '#626A66', lineHeight: 19 },
   status: { borderRadius: 999, paddingHorizontal: 10, paddingVertical: 6 },
   statusDone: { backgroundColor: '#E1F1E9' },
   statusPending: { backgroundColor: '#FFF2D6' },

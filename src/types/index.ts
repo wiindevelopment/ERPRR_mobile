@@ -1,13 +1,26 @@
+export type AssignedProject = {
+  projectCode: string;
+  projectName: string;
+};
+
 export type LoginResponse = {
   employeeCode: string;
-  assignedProjects?: Array<string | number>;
+  employeeName?: string;
+  assignedProjects?: AssignedProject[];
   token?: string;
   [key: string]: unknown;
 };
 
+export type AssetLocationVerification = {
+  assetCode: string;
+  projectCode: string;
+  currentLocation: string | null;
+  correctLocation: boolean;
+};
+
 export type MeterReading = {
   meterReadingId?: string;
-  assetCodeId: number;
+  assetCode: string;
   meterType: string;
   readingDate: string;
   readingValue: number;
@@ -18,17 +31,18 @@ export type MeterReading = {
 };
 
 export type FuelReceived = {
-  fuelReceivedId?: string | number;
-  id?: string | number;
+  fuelIssueId: string;
+  fuelIssueCode?: string;
+  issuedDate?: string;
+  projectCode?: string;
+  issuedBy?: string;
+  receivedBy?: string | null;
+  remarks?: string;
+  assetCode?: string;
   fuelType?: string;
   quantity?: number;
-  amount?: number;
-  receivedDate?: string;
-  date?: string;
-  supplier?: string;
-  vehicleNumber?: string;
-  referenceNo?: string;
-  status?: string;
-  receivedBy?: string;
-  [key: string]: unknown;
+  meterReading?: number;
+  isIssued?: boolean;
+  isReceived?: boolean;
+  isActive?: boolean;
 };

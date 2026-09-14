@@ -1,10 +1,10 @@
 import apiClient from './client';
 import { ENDPOINTS } from './config';
-import { FuelReceived, LoginResponse, MeterReading } from '../types';
+import { AssetLocationVerification, FuelReceived, LoginResponse, MeterReading } from '../types';
 
 export async function login(username: string, password: string) {
   const response = await apiClient.post<LoginResponse>(ENDPOINTS.login, {
-    username,
+    userName: username,
     password,
   });
   return response.data;
@@ -25,28 +25,31 @@ export async function createMeterReading(payload: MeterReading) {
   return response.data;
 }
 
-export async function getFuelReceived(employeeCode: string) {
-  const response = await apiClient.get<FuelReceived[]>(
-    ENDPOINTS.fuelReceivedByUser(employeeCode),
+export async function updateMeterReading(meterReadingId: string, payload: MeterReading) {
+  const response = await apiClient.put<MeterReading>(
+    ENDPOINTS.meterReadingUpdate(meterReadingId),
+    payload,
   );
   return response.data;
 }
 
-export async function markFuelAsReceived(item: FuelReceived, employeeCode: string) {
-  const id = item.fuelReceivedId ?? item.id;
-  if (id === undefined || id === null) {
-    throw new Error('Fuel record does not contain an id.');
-  }
-
-  // Update this payload if your backend expects a different status field.
-  const response = await apiClient.put<FuelReceived>(
-    ENDPOINTS.fuelReceivedUpdate(id),
-    {
-      ...item,
-      status: 'RECEIVED',
-      receivedBy: employeeCode,
-    },
+export async function verifyAssetLocation(assetCode: string, projectCode: string) {
+  const response = await apiClient.get<AssetLocationVerification>(
+    ENDPOINTS.assetLocationVerify(assetCode, projectCode),
   );
+  return response.data;
+}
 
+export async function getFuelReceived(employeeCode: string) {
+  const response = await apiClient.get<FuelReceived[]>(
+    ENDPOINTS.fuelIssuesReceivedBy(employeeCode),
+  );
+  return response.data;
+}
+
+export async function markFuelAsReceived(fuelIssueId: string) {
+  const response = await apiClient.put<FuelReceived>(
+    ENDPOINTS.fuelIssueMarkReceived(fuelIssueId),
+  );
   return response.data;
 }

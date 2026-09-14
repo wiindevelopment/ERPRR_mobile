@@ -34,7 +34,9 @@ export default function RootNavigator() {
       screenOptions={{
         headerTitleAlign: 'center',
         headerShadowVisible: false,
-        headerStyle: { backgroundColor: '#F7F8FA' },
+        headerStyle: { backgroundColor: '#176B4D' },
+        headerTintColor: '#FFFFFF',
+        headerTitleStyle: { color: '#FFFFFF', fontWeight: '800' },
         contentStyle: { backgroundColor: '#F7F8FA' },
       }}
     >
