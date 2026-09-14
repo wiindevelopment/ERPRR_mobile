@@ -28,6 +28,8 @@ export type MeterReading = {
   usageValue: number;
   remarks: string;
   recordedBy: string;
+  submittedAt?: string;
+  editedAt?: string;
 };
 
 export type FuelReceived = {
