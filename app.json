@@ -5,6 +5,7 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
+    "icon": "./src/icon/app-icon.png",
     "assetBundlePatterns": [
       "**/*"
     ],
@@ -13,7 +14,8 @@
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#ffffff"
+        "foregroundImage": "./src/icon/adaptive-icon-foreground.png",
+        "backgroundColor": "#176B4D"
       },
       "package": "com.rrconstruction.meter"
     },
@@ -25,7 +27,8 @@
     "owner": "wiindevelopment",
     "plugins": [
       "expo-status-bar",
-      "expo-image"
+      "expo-image",
+      "expo-font"
     ]
   }
 }

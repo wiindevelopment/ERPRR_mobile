@@ -11,9 +11,23 @@ import PrimaryButton from '../components/PrimaryButton';
 import FormField from '../components/FormField';
 
 const METER_TYPES = ['Odometer - km', 'Hour meter - hr'];
+const EDIT_WINDOW_MS = 15 * 60 * 1000;
+
+function canEditReading(item: MeterReading) {
+  if (!item.submittedAt) return false;
+  const submittedAt = new Date(item.submittedAt).getTime();
+  if (Number.isNaN(submittedAt)) return false;
+  return Date.now() - submittedAt <= EDIT_WINDOW_MS;
+}
 
 function getUnit(meterType: string) {
   return meterType.split(' - ')[1] ?? '';
+}
+
+function formatReadingDate(value: string) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleDateString();
 }
 
 export default function MeterReadingsScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'MeterReadings'>) {
@@ -60,6 +74,10 @@ export default function MeterReadingsScreen({ navigation }: NativeStackScreenPro
 
   const startEdit = () => {
     if (!selected) return;
+    if (!canEditReading(selected)) {
+      Alert.alert('Editing locked', 'This reading can no longer be edited — the 15-minute edit window has passed.');
+      return;
+    }
     setMeterType(selected.meterType);
     setReadingValue(String(selected.readingValue));
     setPreviousReading(String(selected.previousReading));
@@ -124,7 +142,7 @@ export default function MeterReadingsScreen({ navigation }: NativeStackScreenPro
             <View style={styles.row}>
               <Text style={styles.assetCode} numberOfLines={1}>{item.assetCode}</Text>
               <Text style={styles.value} numberOfLines={1}>{item.readingValue} {getUnit(item.meterType)}</Text>
-              <Text style={styles.date} numberOfLines={1}>{item.readingDate}</Text>
+              <Text style={styles.date} numberOfLines={1}>{formatReadingDate(item.readingDate)}</Text>
               <View style={styles.divider} />
               <Pressable style={styles.eyeButton} onPress={() => openDetails(item)} hitSlop={8}>
                 <Ionicons name="eye-outline" size={20} color="#176B4D" />
@@ -140,8 +158,12 @@ export default function MeterReadingsScreen({ navigation }: NativeStackScreenPro
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>{editing ? 'Edit reading' : 'Reading details'}</Text>
               {selected && !editing ? (
-                <Pressable onPress={startEdit} hitSlop={8} style={styles.editButton}>
-                  <Ionicons name="pencil-outline" size={18} color="#176B4D" />
+                <Pressable
+                  onPress={startEdit}
+                  hitSlop={8}
+                  style={[styles.editButton, !canEditReading(selected) && styles.editButtonDisabled]}
+                >
+                  <Ionicons name="pencil-outline" size={18} color={canEditReading(selected) ? '#176B4D' : '#A9AFAC'} />
                 </Pressable>
               ) : null}
             </View>
@@ -150,7 +172,7 @@ export default function MeterReadingsScreen({ navigation }: NativeStackScreenPro
               <View style={styles.detailList}>
                 <DetailRow label="Asset Code" value={selected.assetCode} />
                 <DetailRow label="Meter Type" value={selected.meterType} />
-                <DetailRow label="Reading Date" value={selected.readingDate} />
+                <DetailRow label="Reading Date" value={formatReadingDate(selected.readingDate)} />
                 <DetailRow label="Reading Value" value={`${selected.readingValue} ${getUnit(selected.meterType)}`} />
                 <DetailRow label="Previous Reading" value={`${selected.previousReading} ${getUnit(selected.meterType)}`} />
                 <DetailRow label="Usage" value={`${selected.usageValue} ${getUnit(selected.meterType)}`} />
@@ -225,6 +247,7 @@ const styles = StyleSheet.create({
   modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 },
   modalTitle: { fontSize: 18, fontWeight: '800', color: '#17201C' },
   editButton: { padding: 6, backgroundColor: '#E7F1ED', borderRadius: 10 },
+  editButtonDisabled: { backgroundColor: '#F0F2F1' },
   detailList: { gap: 12 },
   detailRow: { flexDirection: 'row', justifyContent: 'space-between', gap: 12 },
   detailLabel: { color: '#8B929A', fontSize: 13, fontWeight: '600' },
