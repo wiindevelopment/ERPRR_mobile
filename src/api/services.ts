@@ -1,6 +1,6 @@
 import apiClient from './client';
 import { ENDPOINTS } from './config';
-import { AssetLocationVerification, FuelReceived, LoginResponse, MeterReading, ServiceRequest } from '../types';
+import { AssetLocationVerification, FuelReceived, Gin, LoginResponse, MeterReading, PaginatedResponse, ServiceRequest, StockReturn } from '../types';
 
 export async function login(username: string, password: string) {
   const response = await apiClient.post<LoginResponse>(ENDPOINTS.login, {
@@ -65,6 +65,70 @@ export async function createServiceRequest(payload: ServiceRequest) {
 export async function getServiceRequestsByProject(projectCode: string) {
   const response = await apiClient.get<ServiceRequest[]>(
     ENDPOINTS.serviceRequestsByProject(projectCode),
+  );
+  return response.data;
+}
+
+export async function updateServiceRequest(payload: ServiceRequest) {
+  const response = await apiClient.put<ServiceRequest>(
+    ENDPOINTS.serviceRequestUpdate,
+    payload,
+  );
+  return response.data;
+}
+
+export async function getIncomingGins(receivedProjectCode: string, page = 0, size = 10) {
+  const response = await apiClient.get<PaginatedResponse<Gin>>(
+    ENDPOINTS.ginIncoming(receivedProjectCode, page, size),
+  );
+  return response.data;
+}
+
+export async function getIncomingReturns(toProjectCode: string, page = 0, size = 10) {
+  const response = await apiClient.get<PaginatedResponse<StockReturn>>(
+    ENDPOINTS.returnIncoming(toProjectCode, page, size),
+  );
+  return response.data;
+}
+
+export async function getCreatedGins(issuedProjectCode: string, page = 0, size = 10) {
+  const response = await apiClient.get<PaginatedResponse<Gin>>(
+    ENDPOINTS.ginCreated(issuedProjectCode, page, size),
+  );
+  return response.data;
+}
+
+export async function getCreatedReturns(fromProjectCode: string, page = 0, size = 10) {
+  const response = await apiClient.get<PaginatedResponse<StockReturn>>(
+    ENDPOINTS.returnCreated(fromProjectCode, page, size),
+  );
+  return response.data;
+}
+
+export async function verifyGinArrival(ginId: string, gateVerifiedBy: string) {
+  const response = await apiClient.put<Gin>(
+    ENDPOINTS.ginGateVerifyArrival(ginId, gateVerifiedBy),
+  );
+  return response.data;
+}
+
+export async function verifyReturnArrival(stockReturnId: string, gateVerifiedBy: string) {
+  const response = await apiClient.put<StockReturn>(
+    ENDPOINTS.returnGateVerifyArrival(stockReturnId, gateVerifiedBy),
+  );
+  return response.data;
+}
+
+export async function verifyGinGate(ginId: string, gateVerifiedBy: string) {
+  const response = await apiClient.put<Gin>(
+    ENDPOINTS.ginGateVerify(ginId, gateVerifiedBy),
+  );
+  return response.data;
+}
+
+export async function verifyReturnGate(stockReturnId: string, gateVerifiedBy: string) {
+  const response = await apiClient.put<StockReturn>(
+    ENDPOINTS.returnGateVerify(stockReturnId, gateVerifiedBy),
   );
   return response.data;
 }
