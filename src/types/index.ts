@@ -32,6 +32,36 @@ export type MeterReading = {
   editedAt?: string;
 };
 
+export type ServiceRequest = {
+  serviceRequestId?: string;
+  serviceRequestCode?: string;
+  submittedBy: string;
+  requestedDate: string;
+  projectCode: string;
+  assetCode: string;
+  operatorName: string;
+  phoneNumber: string;
+  maintenanceWorks: string;
+  isApproved?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
+export type GatePassStatus = 'INCOMING' | 'CREATED' | 'RETURNED';
+
+export type GatePass = {
+  passId?: string;
+  passCode?: string;
+  projectCode: string;
+  description: string;
+  quantity?: number;
+  status: GatePassStatus;
+  issuedBy?: string;
+  createdBy: string;
+  createdDate: string;
+  remarks?: string;
+};
+
 export type FuelReceived = {
   fuelIssueId: string;
   fuelIssueCode?: string;

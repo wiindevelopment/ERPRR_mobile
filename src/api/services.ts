@@ -1,6 +1,6 @@
 import apiClient from './client';
 import { ENDPOINTS } from './config';
-import { AssetLocationVerification, FuelReceived, LoginResponse, MeterReading } from '../types';
+import { AssetLocationVerification, FuelReceived, LoginResponse, MeterReading, ServiceRequest } from '../types';
 
 export async function login(username: string, password: string) {
   const response = await apiClient.post<LoginResponse>(ENDPOINTS.login, {
@@ -50,6 +50,21 @@ export async function getFuelReceived(employeeCode: string) {
 export async function markFuelAsReceived(fuelIssueId: string) {
   const response = await apiClient.put<FuelReceived>(
     ENDPOINTS.fuelIssueMarkReceived(fuelIssueId),
+  );
+  return response.data;
+}
+
+export async function createServiceRequest(payload: ServiceRequest) {
+  const response = await apiClient.post<ServiceRequest>(
+    ENDPOINTS.serviceRequestCreate,
+    payload,
+  );
+  return response.data;
+}
+
+export async function getServiceRequestsByProject(projectCode: string) {
+  const response = await apiClient.get<ServiceRequest[]>(
+    ENDPOINTS.serviceRequestsByProject(projectCode),
   );
   return response.data;
 }
