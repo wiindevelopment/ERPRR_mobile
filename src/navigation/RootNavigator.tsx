@@ -7,6 +7,11 @@ import HomeScreen from '../screens/HomeScreen';
 import MeterReadingsScreen from '../screens/MeterReadingsScreen';
 import AddMeterReadingScreen from '../screens/AddMeterReadingScreen';
 import FuelReceivedScreen from '../screens/FuelReceivedScreen';
+import AddServiceRequestScreen from '../screens/AddServiceRequestScreen';
+import ServiceRequestsScreen from '../screens/ServiceRequestsScreen';
+import SecurityGatePassScreen from '../screens/SecurityGatePassScreen';
+import IncomingGatePassesScreen from '../screens/IncomingGatePassesScreen';
+import OutgoingGatePassesScreen from '../screens/OutgoingGatePassesScreen';
 
 export type RootStackParamList = {
   Login: undefined;
@@ -14,6 +19,11 @@ export type RootStackParamList = {
   MeterReadings: undefined;
   AddMeterReading: undefined;
   FuelReceived: undefined;
+  ServiceRequests: undefined;
+  AddServiceRequest: undefined;
+  SecurityGatePass: undefined;
+  IncomingGatePasses: undefined;
+  OutgoingGatePasses: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -48,6 +58,11 @@ export default function RootNavigator() {
           <Stack.Screen name="MeterReadings" component={MeterReadingsScreen} options={{ title: 'Meter Readings' }} />
           <Stack.Screen name="AddMeterReading" component={AddMeterReadingScreen} options={{ title: 'New Meter Reading' }} />
           <Stack.Screen name="FuelReceived" component={FuelReceivedScreen} options={{ title: 'Fuel Received' }} />
+          <Stack.Screen name="ServiceRequests" component={ServiceRequestsScreen} options={{ title: 'Service Requests' }} />
+          <Stack.Screen name="AddServiceRequest" component={AddServiceRequestScreen} options={{ title: 'New Service Request' }} />
+          <Stack.Screen name="SecurityGatePass" component={SecurityGatePassScreen} options={{ title: 'Security Gate Pass' }} />
+          <Stack.Screen name="IncomingGatePasses" component={IncomingGatePassesScreen} options={{ title: 'Stock In' }} />
+          <Stack.Screen name="OutgoingGatePasses" component={OutgoingGatePassesScreen} options={{ title: 'Stock Out' }} />
         </>
       )}
     </Stack.Navigator>

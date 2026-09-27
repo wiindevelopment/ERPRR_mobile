@@ -81,6 +81,28 @@ export default function HomeScreen({ navigation }: NativeStackScreenProps<RootSt
           </View>
           <Text style={styles.chevron}>›</Text>
         </Pressable>
+
+        <Pressable style={styles.actionCard} onPress={() => navigation.navigate('ServiceRequests')}>
+          <View style={[styles.icon, styles.iconService]}>
+            <Ionicons name="construct-outline" size={24} color="#1D5FA8" />
+          </View>
+          <View style={styles.actionTextWrap}>
+            <Text style={styles.actionTitle}>Service Request</Text>
+            <Text style={styles.actionSubtitle}>Report an issue or request maintenance</Text>
+          </View>
+          <Text style={styles.chevron}>›</Text>
+        </Pressable>
+
+        <Pressable style={styles.actionCard} onPress={() => navigation.navigate('SecurityGatePass')}>
+          <View style={[styles.icon, styles.iconGin]}>
+            <Ionicons name="shield-checkmark-outline" size={24} color="#6A3FA0" />
+          </View>
+          <View style={styles.actionTextWrap}>
+            <Text style={styles.actionTitle}>Security Gate Pass</Text>
+            <Text style={styles.actionSubtitle}>Track incoming, created passes and returns</Text>
+          </View>
+          <Text style={styles.chevron}>›</Text>
+        </Pressable>
       </View>
 
       <Modal visible={pickerVisible} animationType="slide" transparent onRequestClose={() => setPickerVisible(false)}>
@@ -147,9 +169,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', gap: 14, backgroundColor: '#FFFFFF', borderRadius: 18,
     padding: 18, borderWidth: 1, borderColor: '#E7EAE8'
   },
-  icon: { width: 48, height: 48, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
+  icon: { width: 48, height: 48, borderRadius: 14, overflow: 'hidden', alignItems: 'center', justifyContent: 'center' },
   iconMeter: { backgroundColor: '#E7F1ED' },
   iconFuel: { backgroundColor: '#FBEAD9' },
+  iconService: { backgroundColor: '#E4EDF8' },
+  iconGin: { backgroundColor: '#EFE7F8' },
   actionTextWrap: { flex: 1, gap: 3 },
   actionTitle: { fontSize: 17, fontWeight: '800', color: '#17201C' },
   actionSubtitle: { fontSize: 13, lineHeight: 18, color: '#737B77' },
