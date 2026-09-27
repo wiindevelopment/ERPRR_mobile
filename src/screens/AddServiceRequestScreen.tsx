@@ -3,17 +3,19 @@ import { Alert, KeyboardAvoidingView, Platform, Pressable, SafeAreaView, ScrollV
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/RootNavigator';
 import FormField from '../components/FormField';
+import DefectMultiSelect from '../components/DefectMultiSelect';
 import PrimaryButton from '../components/PrimaryButton';
 import { useAuth } from '../context/AuthContext';
 import { createServiceRequest, getServiceRequestsByProject, verifyAssetLocation } from '../api/services';
 import { generateUuidV4 } from '../utils/uuid';
+import { joinDefects } from '../constants/maintenanceDefects';
 
 export default function AddServiceRequestScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'AddServiceRequest'>) {
   const { user, selectedProject } = useAuth();
   const [assetCode, setAssetCode] = useState('');
   const [operatorName, setOperatorName] = useState(user?.employeeName ?? '');
   const [phoneNumber, setPhoneNumber] = useState('');
-  const [maintenanceWorks, setMaintenanceWorks] = useState('');
+  const [maintenanceWorks, setMaintenanceWorks] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [verifying, setVerifying] = useState(false);
   const [verificationStatus, setVerificationStatus] = useState<'verified' | 'mismatch' | null>(null);
@@ -72,8 +74,8 @@ export default function AddServiceRequestScreen({ navigation }: NativeStackScree
       Alert.alert('Phone number required', 'Enter a contact phone number.');
       return;
     }
-    if (!maintenanceWorks.trim()) {
-      Alert.alert('Maintenance works required', 'Describe the maintenance work needed.');
+    if (!maintenanceWorks.length) {
+      Alert.alert('Maintenance works required', 'Select at least one defect.');
       return;
     }
     if (!selectedProject?.projectCode) {
@@ -100,7 +102,7 @@ export default function AddServiceRequestScreen({ navigation }: NativeStackScree
         assetCode: assetCode.trim(),
         operatorName: operatorName.trim(),
         phoneNumber: phoneNumber.trim(),
-        maintenanceWorks: maintenanceWorks.trim(),
+        maintenanceWorks: joinDefects(maintenanceWorks),
       });
       Alert.alert('Saved', 'Service request submitted successfully.', [
         { text: 'OK', onPress: () => navigation.goBack() },
@@ -135,16 +137,7 @@ export default function AddServiceRequestScreen({ navigation }: NativeStackScree
           <FormField label="Project" value={selectedProject?.projectName ?? 'No project selected'} editable={false} />
           <FormField label="Operator Name" placeholder="Enter operator name" value={operatorName} onChangeText={setOperatorName} />
           <FormField label="Phone Number" placeholder="Enter contact number" keyboardType="phone-pad" value={phoneNumber} onChangeText={setPhoneNumber} />
-          <FormField
-            label="Maintenance Works"
-            placeholder="Describe the maintenance work needed"
-            multiline
-            numberOfLines={5}
-            value={maintenanceWorks}
-            onChangeText={setMaintenanceWorks}
-            style={styles.maintenanceInput}
-            textAlignVertical="top"
-          />
+          <DefectMultiSelect label="Maintenance Works" value={maintenanceWorks} onChange={setMaintenanceWorks} />
 
           <PrimaryButton title="Submit Service Request" onPress={submit} loading={submitting} />
         </ScrollView>
@@ -166,5 +159,4 @@ const styles = StyleSheet.create({
   verifyButtonText: { color: '#FFFFFF', fontWeight: '700' },
   verifiedText: { fontSize: 11, fontWeight: '700', color: '#176B4D', marginTop: 5 },
   mismatchText: { fontSize: 11, fontWeight: '700', color: '#C0392B', marginTop: 5 },
-  maintenanceInput: { minHeight: 110, paddingTop: 14 },
 });

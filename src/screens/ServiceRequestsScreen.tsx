@@ -9,6 +9,8 @@ import { getServiceRequestsByProject, updateServiceRequest } from '../api/servic
 import { ServiceRequest } from '../types';
 import PrimaryButton from '../components/PrimaryButton';
 import FormField from '../components/FormField';
+import DefectMultiSelect from '../components/DefectMultiSelect';
+import { joinDefects, parseDefects } from '../constants/maintenanceDefects';
 
 function display(value: unknown, fallback = '-') {
   return value === undefined || value === null || value === '' ? fallback : String(value);
@@ -35,7 +37,7 @@ export default function ServiceRequestsScreen({ navigation }: NativeStackScreenP
   const [assetCode, setAssetCode] = useState('');
   const [operatorName, setOperatorName] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
-  const [maintenanceWorks, setMaintenanceWorks] = useState('');
+  const [maintenanceWorks, setMaintenanceWorks] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
 
   const load = useCallback(async (showLoader = true) => {
@@ -73,14 +75,14 @@ export default function ServiceRequestsScreen({ navigation }: NativeStackScreenP
     setAssetCode(selected.assetCode);
     setOperatorName(selected.operatorName);
     setPhoneNumber(selected.phoneNumber);
-    setMaintenanceWorks(selected.maintenanceWorks);
+    setMaintenanceWorks(parseDefects(selected.maintenanceWorks));
     setEditing(true);
   };
 
   const saveEdit = async () => {
     if (!selected) return;
-    if (!assetCode.trim() || !operatorName.trim() || !phoneNumber.trim() || !maintenanceWorks.trim()) {
-      Alert.alert('Check inputs', 'Fill in asset code, operator name, phone number and maintenance works.');
+    if (!assetCode.trim() || !operatorName.trim() || !phoneNumber.trim() || !maintenanceWorks.length) {
+      Alert.alert('Check inputs', 'Fill in asset code, operator name, phone number and at least one maintenance defect.');
       return;
     }
 
@@ -91,7 +93,7 @@ export default function ServiceRequestsScreen({ navigation }: NativeStackScreenP
         assetCode: assetCode.trim(),
         operatorName: operatorName.trim(),
         phoneNumber: phoneNumber.trim(),
-        maintenanceWorks: maintenanceWorks.trim(),
+        maintenanceWorks: joinDefects(maintenanceWorks),
       });
       setItems(current => current.map(row => (row.serviceRequestId === selected.serviceRequestId ? updated : row)));
       setSelected(updated);
@@ -158,7 +160,7 @@ export default function ServiceRequestsScreen({ navigation }: NativeStackScreenP
                 <DetailRow label="Project" value={display(selected.projectCode)} />
                 <DetailRow label="Operator Name" value={display(selected.operatorName)} />
                 <DetailRow label="Phone Number" value={display(selected.phoneNumber)} />
-                <DetailRow label="Maintenance Works" value={display(selected.maintenanceWorks)} />
+                <DetailRow label="Maintenance Works" value={display(parseDefects(selected.maintenanceWorks).join('\n'))} />
                 <DetailRow label="Requested Date" value={formatDate(selected.requestedDate)} />
                 <DetailRow label="Submitted By" value={display(selected.submittedBy)} />
                 <DetailRow label="Status" value={selected.isApproved ? 'Approved' : 'Pending'} />
@@ -170,14 +172,7 @@ export default function ServiceRequestsScreen({ navigation }: NativeStackScreenP
                 <FormField label="Asset Code" autoCapitalize="characters" value={assetCode} onChangeText={setAssetCode} />
                 <FormField label="Operator Name" value={operatorName} onChangeText={setOperatorName} />
                 <FormField label="Phone Number" keyboardType="phone-pad" value={phoneNumber} onChangeText={setPhoneNumber} />
-                <FormField
-                  label="Maintenance Works"
-                  multiline
-                  numberOfLines={4}
-                  value={maintenanceWorks}
-                  onChangeText={setMaintenanceWorks}
-                  textAlignVertical="top"
-                />
+                <DefectMultiSelect label="Maintenance Works" value={maintenanceWorks} onChange={setMaintenanceWorks} />
                 <PrimaryButton title="Save Changes" onPress={saveEdit} loading={saving} />
               </View>
             ) : null}
