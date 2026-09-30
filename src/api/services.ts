@@ -1,6 +1,6 @@
 import apiClient from './client';
 import { ENDPOINTS } from './config';
-import { AssetLocationVerification, FuelReceived, Gin, LoginResponse, MeterReading, OperatorAsset, PaginatedResponse, ServiceRequest, StockReturn } from '../types';
+import { FuelReceived, Gin, LoginResponse, MeterReading, OperatorAsset, PaginatedResponse, ServiceRequest, StockReturn } from '../types';
 
 export async function login(username: string, password: string) {
   const response = await apiClient.post<LoginResponse>(ENDPOINTS.login, {
@@ -29,13 +29,6 @@ export async function updateMeterReading(meterReadingId: string, payload: MeterR
   const response = await apiClient.put<MeterReading>(
     ENDPOINTS.meterReadingUpdate(meterReadingId),
     payload,
-  );
-  return response.data;
-}
-
-export async function verifyAssetLocation(assetCode: string, projectCode: string) {
-  const response = await apiClient.get<AssetLocationVerification>(
-    ENDPOINTS.assetLocationVerify(assetCode, projectCode),
   );
   return response.data;
 }

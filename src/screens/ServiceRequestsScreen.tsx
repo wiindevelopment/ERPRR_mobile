@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import React, { useCallback, useState } from 'react';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { ActivityIndicator, Alert, FlatList, Modal, Pressable, RefreshControl, SafeAreaView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, FlatList, Modal, Pressable, RefreshControl, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { RootStackParamList } from '../navigation/RootNavigator';
 import { useAuth } from '../context/AuthContext';
@@ -9,7 +9,9 @@ import { getServiceRequestsByProject, updateServiceRequest } from '../api/servic
 import { ServiceRequest } from '../types';
 import PrimaryButton from '../components/PrimaryButton';
 import FormField from '../components/FormField';
+import AssetCodeSelect from '../components/AssetCodeSelect';
 import DefectMultiSelect from '../components/DefectMultiSelect';
+import RequestTypeSelect from '../components/RequestTypeSelect';
 import { joinDefects, parseDefects } from '../constants/maintenanceDefects';
 
 function display(value: unknown, fallback = '-') {
@@ -37,7 +39,9 @@ export default function ServiceRequestsScreen({ navigation }: NativeStackScreenP
   const [assetCode, setAssetCode] = useState('');
   const [operatorName, setOperatorName] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
+  const [requestType, setRequestType] = useState('');
   const [maintenanceWorks, setMaintenanceWorks] = useState<string[]>([]);
+  const [remarks, setRemarks] = useState('');
   const [saving, setSaving] = useState(false);
 
   const load = useCallback(async (showLoader = true) => {
@@ -75,14 +79,16 @@ export default function ServiceRequestsScreen({ navigation }: NativeStackScreenP
     setAssetCode(selected.assetCode);
     setOperatorName(selected.operatorName);
     setPhoneNumber(selected.phoneNumber);
+    setRequestType(selected.requestType ?? '');
     setMaintenanceWorks(parseDefects(selected.maintenanceWorks));
+    setRemarks(selected.remarks ?? '');
     setEditing(true);
   };
 
   const saveEdit = async () => {
     if (!selected) return;
-    if (!assetCode.trim() || !operatorName.trim() || !phoneNumber.trim() || !maintenanceWorks.length) {
-      Alert.alert('Check inputs', 'Fill in asset code, operator name, phone number and at least one maintenance defect.');
+    if (!assetCode.trim() || !operatorName.trim() || !phoneNumber.trim() || !requestType || !maintenanceWorks.length) {
+      Alert.alert('Check inputs', 'Fill in asset code, operator name, phone number, request type and at least one maintenance defect.');
       return;
     }
 
@@ -94,6 +100,8 @@ export default function ServiceRequestsScreen({ navigation }: NativeStackScreenP
         operatorName: operatorName.trim(),
         phoneNumber: phoneNumber.trim(),
         maintenanceWorks: joinDefects(maintenanceWorks),
+        requestType,
+        remarks: remarks.trim(),
       });
       setItems(current => current.map(row => (row.serviceRequestId === selected.serviceRequestId ? updated : row)));
       setSelected(updated);
@@ -138,8 +146,9 @@ export default function ServiceRequestsScreen({ navigation }: NativeStackScreenP
       </View>
 
       <Modal visible={!!selected} animationType="slide" transparent onRequestClose={closeModal}>
-        <Pressable style={styles.modalBackdrop} onPress={closeModal}>
-          <Pressable style={styles.modalSheet} onPress={() => {}}>
+        <View style={styles.modalBackdrop}>
+          <Pressable style={StyleSheet.absoluteFill} onPress={closeModal} />
+          <View style={styles.modalSheet}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>{editing ? 'Edit request' : 'Service request details'}</Text>
               {selected && !editing ? (
@@ -153,6 +162,7 @@ export default function ServiceRequestsScreen({ navigation }: NativeStackScreenP
               ) : null}
             </View>
 
+            <ScrollView style={styles.modalScroll} keyboardShouldPersistTaps="handled">
             {selected && !editing ? (
               <View style={styles.detailList}>
                 <DetailRow label="Service Code" value={display(selected.serviceRequestCode)} />
@@ -160,28 +170,42 @@ export default function ServiceRequestsScreen({ navigation }: NativeStackScreenP
                 <DetailRow label="Project" value={display(selected.projectCode)} />
                 <DetailRow label="Operator Name" value={display(selected.operatorName)} />
                 <DetailRow label="Phone Number" value={display(selected.phoneNumber)} />
+                <DetailRow label="Request Type" value={display(selected.requestType)} />
                 <DetailRow label="Maintenance Works" value={display(parseDefects(selected.maintenanceWorks).join('\n'))} />
                 <DetailRow label="Requested Date" value={formatDate(selected.requestedDate)} />
                 <DetailRow label="Submitted By" value={display(selected.submittedBy)} />
+                <DetailRow label="Remarks" value={display(selected.remarks, 'No remarks')} />
                 <DetailRow label="Status" value={selected.isApproved ? 'Approved' : 'Pending'} />
               </View>
             ) : null}
 
             {selected && editing ? (
               <View style={styles.editForm}>
-                <FormField label="Asset Code" autoCapitalize="characters" value={assetCode} onChangeText={setAssetCode} />
+                <AssetCodeSelect label="Asset Code" value={assetCode} onChange={setAssetCode} />
                 <FormField label="Operator Name" value={operatorName} onChangeText={setOperatorName} />
                 <FormField label="Phone Number" keyboardType="phone-pad" value={phoneNumber} onChangeText={setPhoneNumber} />
+                <RequestTypeSelect label="Request Type" value={requestType} onChange={setRequestType} />
                 <DefectMultiSelect label="Maintenance Works" value={maintenanceWorks} onChange={setMaintenanceWorks} />
+                <FormField
+                  label="Remarks"
+                  placeholder="Optional remarks"
+                  multiline
+                  numberOfLines={3}
+                  value={remarks}
+                  onChangeText={setRemarks}
+                  style={styles.remarksInput}
+                  textAlignVertical="top"
+                />
                 <PrimaryButton title="Save Changes" onPress={saveEdit} loading={saving} />
               </View>
             ) : null}
+            </ScrollView>
 
             <Pressable style={styles.closeButton} onPress={closeModal}>
               <Text style={styles.closeButtonText}>Close</Text>
             </Pressable>
-          </Pressable>
-        </Pressable>
+          </View>
+        </View>
       </Modal>
     </SafeAreaView>
   );
@@ -230,7 +254,9 @@ const styles = StyleSheet.create({
   detailRow: { flexDirection: 'row', justifyContent: 'space-between', gap: 12 },
   detailLabel: { color: '#8B929A', fontSize: 13, fontWeight: '600' },
   detailValue: { color: '#17201C', fontSize: 14, fontWeight: '700', flexShrink: 1, textAlign: 'right' },
+  modalScroll: { flexShrink: 1 },
   editForm: { gap: 14 },
+  remarksInput: { minHeight: 80, paddingTop: 14 },
   closeButton: { marginTop: 20, backgroundColor: '#ECEFED', borderRadius: 12, paddingVertical: 13, alignItems: 'center' },
   closeButtonText: { color: '#49504C', fontWeight: '800' },
 });

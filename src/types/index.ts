@@ -17,13 +17,6 @@ export type OperatorAsset = {
   assetClass?: string;
 };
 
-export type AssetLocationVerification = {
-  assetCode: string;
-  projectCode: string;
-  currentLocation: string | null;
-  correctLocation: boolean;
-};
-
 export type MeterReading = {
   meterReadingId?: string;
   assetCode: string;
@@ -48,6 +41,8 @@ export type ServiceRequest = {
   operatorName: string;
   phoneNumber: string;
   maintenanceWorks: string;
+  requestType: string;
+  remarks?: string;
   isApproved?: boolean;
   createdAt?: string;
   updatedAt?: string;

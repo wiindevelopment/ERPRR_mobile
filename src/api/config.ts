@@ -1,7 +1,7 @@
 // IMPORTANT:
 // If you are testing on a physical phone, do NOT use localhost here.
 // Use your computer/server LAN IP, e.g. http://192.168.1.20:8080
-//export const API_BASE_URL = 'http://ec2-13-126-81-39.ap-south-1.compute.amazonaws.com:8080';
+//export const API_BASE_URL = 'http://ec2-3-7-70-139.ap-south-1.compute.amazonaws.com:8080';
 export const API_BASE_URL = 'http://192.168.8.195:8080';
 
 export const ENDPOINTS = {
@@ -11,9 +11,6 @@ export const ENDPOINTS = {
     `/api/meter_reading/${encodeURIComponent(employeeCode)}`,
   meterReadingUpdate: (meterReadingId: string) =>
     `/api/meter_reading/${encodeURIComponent(meterReadingId)}`,
-
-  assetLocationVerify: (assetCode: string, projectCode: string) =>
-    `/api/asset-location/verify/${encodeURIComponent(assetCode)}/${encodeURIComponent(projectCode)}`,
 
   assetsByOperator: (employeeCode: string) =>
     `/api/assets/by-operator/${encodeURIComponent(employeeCode)}`,
