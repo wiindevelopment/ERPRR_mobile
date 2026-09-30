@@ -7,6 +7,8 @@ import HomeScreen from '../screens/HomeScreen';
 import MeterReadingsScreen from '../screens/MeterReadingsScreen';
 import AddMeterReadingScreen from '../screens/AddMeterReadingScreen';
 import FuelReceivedScreen from '../screens/FuelReceivedScreen';
+import ItemReceivedScreen from '../screens/ItemReceivedScreen';
+import GoodsReceivedScreen from '../screens/GoodsReceivedScreen';
 import AddServiceRequestScreen from '../screens/AddServiceRequestScreen';
 import ServiceRequestsScreen from '../screens/ServiceRequestsScreen';
 import SecurityGatePassScreen from '../screens/SecurityGatePassScreen';
@@ -18,7 +20,9 @@ export type RootStackParamList = {
   Home: undefined;
   MeterReadings: undefined;
   AddMeterReading: undefined;
+  ItemReceived: undefined;
   FuelReceived: undefined;
+  GoodsReceived: undefined;
   ServiceRequests: undefined;
   AddServiceRequest: undefined;
   SecurityGatePass: undefined;
@@ -57,7 +61,9 @@ export default function RootNavigator() {
           <Stack.Screen name="Home" component={HomeScreen} options={{ title: 'Operator App' }} />
           <Stack.Screen name="MeterReadings" component={MeterReadingsScreen} options={{ title: 'Meter Readings' }} />
           <Stack.Screen name="AddMeterReading" component={AddMeterReadingScreen} options={{ title: 'New Meter Reading' }} />
+          <Stack.Screen name="ItemReceived" component={ItemReceivedScreen} options={{ title: 'Item Received' }} />
           <Stack.Screen name="FuelReceived" component={FuelReceivedScreen} options={{ title: 'Fuel Received' }} />
+          <Stack.Screen name="GoodsReceived" component={GoodsReceivedScreen} options={{ title: 'Goods Received' }} />
           <Stack.Screen name="ServiceRequests" component={ServiceRequestsScreen} options={{ title: 'Service Requests' }} />
           <Stack.Screen name="AddServiceRequest" component={AddServiceRequestScreen} options={{ title: 'New Service Request' }} />
           <Stack.Screen name="SecurityGatePass" component={SecurityGatePassScreen} options={{ title: 'Security Gate Pass' }} />

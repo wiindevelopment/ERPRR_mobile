@@ -1,8 +1,8 @@
 // IMPORTANT:
 // If you are testing on a physical phone, do NOT use localhost here.
 // Use your computer/server LAN IP, e.g. http://192.168.1.20:8080
-export const API_BASE_URL = 'http://ec2-13-126-81-39.ap-south-1.compute.amazonaws.com:8080';
-//export const API_BASE_URL = 'http://192.168.1.11:8080';
+//export const API_BASE_URL = 'http://ec2-13-126-81-39.ap-south-1.compute.amazonaws.com:8080';
+export const API_BASE_URL = 'http://192.168.8.195:8080';
 
 export const ENDPOINTS = {
   login: '/api/login',
@@ -14,6 +14,9 @@ export const ENDPOINTS = {
 
   assetLocationVerify: (assetCode: string, projectCode: string) =>
     `/api/asset-location/verify/${encodeURIComponent(assetCode)}/${encodeURIComponent(projectCode)}`,
+
+  assetsByOperator: (employeeCode: string) =>
+    `/api/assets/by-operator/${encodeURIComponent(employeeCode)}`,
 
   fuelIssuesReceivedBy: (receivedBy: string) =>
     `/api/fuel_issue/received/${encodeURIComponent(receivedBy)}`,
@@ -30,6 +33,8 @@ export const ENDPOINTS = {
     `/api/gin/incoming/${encodeURIComponent(receivedProjectCode)}?page=${page}&size=${size}`,
   returnIncoming: (toProjectCode: string, page: number, size: number) =>
     `/api/return/incoming/${encodeURIComponent(toProjectCode)}?page=${page}&size=${size}`,
+  ginReceivedBy: (employeeCode: string, page: number, size: number) =>
+    `/api/gin/received-by/${encodeURIComponent(employeeCode)}?page=${page}&size=${size}`,
   ginCreated: (issuedProjectCode: string, page: number, size: number) =>
     `/api/gin/created/${encodeURIComponent(issuedProjectCode)}?page=${page}&size=${size}`,
   returnCreated: (fromProjectCode: string, page: number, size: number) =>

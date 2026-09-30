@@ -1,67 +1,54 @@
-import React, { useMemo, useState } from 'react';
-import { Alert, KeyboardAvoidingView, Platform, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import React, { useEffect, useMemo, useState } from 'react';
+import { ActivityIndicator, Alert, FlatList, KeyboardAvoidingView, Modal, Platform, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/RootNavigator';
 import FormField from '../components/FormField';
 import PrimaryButton from '../components/PrimaryButton';
 import { useAuth } from '../context/AuthContext';
 import { getTodayYYYYMMDD } from '../utils/date';
-import { createMeterReading, verifyAssetLocation } from '../api/services';
+import { createMeterReading, getAssetsByOperator } from '../api/services';
+import { OperatorAsset } from '../types';
 import { generateUuidV4 } from '../utils/uuid';
 
 const METER_TYPES = ['Odometer - km', 'Hour meter - hr'];
 
 export default function AddMeterReadingScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'AddMeterReading'>) {
-  const { user, selectedProject } = useAuth();
+  const { user } = useAuth();
   const [assetCodeId, setAssetCodeId] = useState('');
   const [meterType, setMeterType] = useState(METER_TYPES[0]);
   const [readingValue, setReadingValue] = useState('');
   const [previousReading, setPreviousReading] = useState('');
   const [remarks, setRemarks] = useState('');
   const [submitting, setSubmitting] = useState(false);
-  const [verifying, setVerifying] = useState(false);
-  const [verificationStatus, setVerificationStatus] = useState<'verified' | 'mismatch' | null>(null);
+  const [assets, setAssets] = useState<OperatorAsset[]>([]);
+  const [assetsLoading, setAssetsLoading] = useState(true);
+  const [assetPickerVisible, setAssetPickerVisible] = useState(false);
   const readingDate = getTodayYYYYMMDD();
 
-  const handleAssetCodeChange = (text: string) => {
-    setAssetCodeId(text);
-    setVerificationStatus(null);
-  };
-
-  const handleVerifyLocation = async () => {
-    if (!assetCodeId.trim()) {
-      Alert.alert('Asset code required', 'Enter an asset code first.');
-      return;
-    }
-    if (!selectedProject?.projectCode) {
-      Alert.alert('No project selected', 'Select a project on the home screen before verifying.');
-      return;
-    }
-
-    try {
-      setVerifying(true);
-      const result = await verifyAssetLocation(assetCodeId.trim(), selectedProject.projectCode);
-      if (result.correctLocation) {
-        setVerificationStatus('verified');
-        Alert.alert(
-          'Location verified',
-          `Asset ${result.assetCode} is at ${result.currentLocation ?? selectedProject.projectName}, matching ${selectedProject.projectName}.`,
-        );
-      } else {
-        setVerificationStatus('mismatch');
-        Alert.alert(
-          'Location mismatch',
-          result.currentLocation
-            ? `Asset ${result.assetCode} is currently recorded at "${result.currentLocation}", not ${selectedProject.projectName} (${selectedProject.projectCode}).`
-            : `Asset ${result.assetCode} has no recorded location, so it cannot be confirmed at ${selectedProject.projectName} (${selectedProject.projectCode}).`,
-        );
+  useEffect(() => {
+    if (!user?.employeeCode) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        setAssetsLoading(true);
+        const data = await getAssetsByOperator(user.employeeCode);
+        if (cancelled) return;
+        const list = Array.isArray(data) ? data : [];
+        setAssets(list);
+        if (list.length === 1) setAssetCodeId(list[0].assetCode);
+      } catch (error: any) {
+        if (!cancelled) Alert.alert('Could not load assets', error?.response?.data?.message ?? error?.message ?? 'Request failed.');
+      } finally {
+        if (!cancelled) setAssetsLoading(false);
       }
-    } catch (error: any) {
-      setVerificationStatus(null);
-      Alert.alert('Verification failed', error?.response?.data?.message ?? error?.message ?? 'Could not verify asset location.');
-    } finally {
-      setVerifying(false);
-    }
+    })();
+    return () => { cancelled = true; };
+  }, [user?.employeeCode]);
+
+  const selectAsset = (asset: OperatorAsset) => {
+    setAssetCodeId(asset.assetCode);
+    setAssetPickerVisible(false);
   };
 
   const usageValue = useMemo(() => {
@@ -84,15 +71,11 @@ export default function AddMeterReadingScreen({ navigation }: NativeStackScreenP
     const previous = Number(previousReading);
 
     if (!assetCodeId.trim() || !readingValue || Number.isNaN(current) || !previousReading || Number.isNaN(previous)) {
-      Alert.alert('Check inputs', 'Enter a valid asset code, reading value and previous reading value.');
+      Alert.alert('Check inputs', 'Select an asset code and enter valid reading and previous reading values.');
       return;
     }
     if (readingError) {
       Alert.alert('Invalid reading', readingError);
-      return;
-    }
-    if (verificationStatus !== 'verified') {
-      Alert.alert('Verify asset code', 'Verify the asset code location before submitting the reading.');
       return;
     }
     if (!user?.employeeCode) return;
@@ -124,20 +107,20 @@ export default function AddMeterReadingScreen({ navigation }: NativeStackScreenP
     <SafeAreaView style={styles.safe}>
       <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
-          <View>
-            <View style={styles.assetRow}>
-              <View style={styles.assetField}>
-                <FormField label="Asset Code" placeholder="Enter asset code" autoCapitalize="characters" value={assetCodeId} onChangeText={handleAssetCodeChange} />
-              </View>
-              <Pressable style={styles.verifyButton} onPress={handleVerifyLocation} disabled={verifying}>
-                <Text style={styles.verifyButtonText}>{verifying ? 'Checking…' : 'Verify'}</Text>
-              </Pressable>
-            </View>
-            {verificationStatus ? (
-              <Text style={verificationStatus === 'verified' ? styles.verifiedText : styles.mismatchText}>
-                {verificationStatus === 'verified' ? 'Verified' : 'Not verified'}
+          <View style={styles.fieldGroup}>
+            <Text style={styles.label}>Asset Code</Text>
+            <Pressable
+              style={[styles.dropdown, (assetsLoading || !assets.length) && styles.dropdownDisabled]}
+              onPress={() => setAssetPickerVisible(true)}
+              disabled={assetsLoading || !assets.length}
+            >
+              <Text style={assetCodeId ? styles.dropdownValue : styles.dropdownPlaceholder}>
+                {assetsLoading
+                  ? 'Loading assets…'
+                  : assetCodeId || (assets.length ? 'Select asset code' : 'No assets assigned to you')}
               </Text>
-            ) : null}
+              {assetsLoading ? <ActivityIndicator size="small" /> : <Ionicons name="chevron-down" size={18} color="#8B929A" />}
+            </Pressable>
           </View>
 
           <View style={styles.fieldGroup}>
@@ -165,6 +148,32 @@ export default function AddMeterReadingScreen({ navigation }: NativeStackScreenP
           <PrimaryButton title="Submit Meter Reading" onPress={submit} loading={submitting} />
         </ScrollView>
       </KeyboardAvoidingView>
+
+      <Modal visible={assetPickerVisible} animationType="slide" transparent onRequestClose={() => setAssetPickerVisible(false)}>
+        <View style={styles.modalBackdrop}>
+          <Pressable style={StyleSheet.absoluteFill} onPress={() => setAssetPickerVisible(false)} />
+          <View style={styles.modalSheet}>
+            <Text style={styles.modalTitle}>Select asset</Text>
+            <FlatList
+              data={assets}
+              keyExtractor={(item, index) => String(item.assetCodeId ?? item.assetCode ?? index)}
+              ItemSeparatorComponent={() => <View style={styles.separator} />}
+              renderItem={({ item }) => {
+                const isSelected = item.assetCode === assetCodeId;
+                return (
+                  <Pressable style={[styles.assetOption, isSelected && styles.assetOptionSelected]} onPress={() => selectAsset(item)}>
+                    <View>
+                      <Text style={[styles.assetOptionCode, isSelected && styles.assetOptionCodeSelected]}>{item.assetCode}</Text>
+                      {item.assetClass ? <Text style={styles.assetOptionClass}>{item.assetClass}</Text> : null}
+                    </View>
+                    {isSelected ? <Ionicons name="checkmark" size={20} color="#176B4D" /> : null}
+                  </Pressable>
+                );
+              }}
+            />
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -173,15 +182,13 @@ const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: '#F7F8FA' },
   flex: { flex: 1 },
   container: { padding: 18, gap: 16, paddingBottom: 36 },
-  assetRow: { flexDirection: 'row', gap: 10, alignItems: 'flex-end' },
-  assetField: { flex: 1 },
-  verifyButton: {
-    backgroundColor: '#176B4D', borderRadius: 12, paddingHorizontal: 16,
-    height: 50, alignItems: 'center', justifyContent: 'center',
+  dropdown: {
+    minHeight: 50, borderWidth: 1, borderColor: '#DDE1E6', borderRadius: 12, backgroundColor: '#FFFFFF',
+    paddingHorizontal: 14, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
   },
-  verifyButtonText: { color: '#FFFFFF', fontWeight: '700' },
-  verifiedText: { fontSize: 11, fontWeight: '700', color: '#176B4D', marginTop: 5 },
-  mismatchText: { fontSize: 11, fontWeight: '700', color: '#C0392B', marginTop: 5 },
+  dropdownDisabled: { backgroundColor: '#F0F2F4' },
+  dropdownValue: { fontSize: 15, color: '#15191D', fontWeight: '600' },
+  dropdownPlaceholder: { fontSize: 15, color: '#8B929A' },
   errorText: { fontSize: 12, fontWeight: '700', color: '#C0392B', marginTop: -8 },
   fieldGroup: { gap: 8 },
   label: { fontSize: 13, fontWeight: '700', color: '#343A40' },
@@ -191,4 +198,19 @@ const styles = StyleSheet.create({
   chipText: { color: '#5C6460', fontWeight: '700' },
   chipTextSelected: { color: '#176B4D' },
   remarksInput: { minHeight: 96, paddingTop: 14 },
+  modalBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'flex-end' },
+  modalSheet: {
+    backgroundColor: '#FFFFFF', borderTopLeftRadius: 24, borderTopRightRadius: 24,
+    padding: 20, maxHeight: '70%',
+  },
+  modalTitle: { fontSize: 18, fontWeight: '800', color: '#17201C', marginBottom: 12 },
+  separator: { height: 1, backgroundColor: '#EEF0EF' },
+  assetOption: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    paddingVertical: 14, paddingHorizontal: 10, borderRadius: 12,
+  },
+  assetOptionSelected: { backgroundColor: '#E7F1ED' },
+  assetOptionCode: { fontSize: 15, fontWeight: '700', color: '#17201C' },
+  assetOptionCodeSelected: { color: '#176B4D' },
+  assetOptionClass: { fontSize: 12, color: '#8B929A', marginTop: 2 },
 });

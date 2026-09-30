@@ -11,6 +11,12 @@ export type LoginResponse = {
   [key: string]: unknown;
 };
 
+export type OperatorAsset = {
+  assetCode: string;
+  assetCodeId?: number;
+  assetClass?: string;
+};
+
 export type AssetLocationVerification = {
   assetCode: string;
   projectCode: string;
@@ -69,7 +75,16 @@ export type GinItem = {
   amount?: number;
   lengthM?: number;
   widthM?: number;
+  stockBatchId?: string;
   assetCode?: string;
+  packItems?: GinPackItem[];
+};
+
+export type GinPackItem = {
+  packItemId?: number;
+  included?: boolean;
+  name?: string;
+  quantity?: number;
 };
 
 export type Gin = {
@@ -82,6 +97,7 @@ export type Gin = {
   receivedPerson?: string;
   vehicleNo?: string;
   vehicleAssetCode?: string;
+  forAssetCode?: string;
   approvedBy?: string;
   approvedDate?: string;
   isAuthorized?: boolean;
