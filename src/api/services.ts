@@ -1,6 +1,6 @@
 import apiClient from './client';
 import { ENDPOINTS } from './config';
-import { AssetLocationVerification, FuelReceived, Gin, LoginResponse, MeterReading, PaginatedResponse, ServiceRequest, StockReturn } from '../types';
+import { FuelReceived, Gin, LoginResponse, MeterReading, OperatorAsset, PaginatedResponse, ServiceFaultType, ServiceRequest, StockReturn } from '../types';
 
 export async function login(username: string, password: string) {
   const response = await apiClient.post<LoginResponse>(ENDPOINTS.login, {
@@ -33,9 +33,9 @@ export async function updateMeterReading(meterReadingId: string, payload: MeterR
   return response.data;
 }
 
-export async function verifyAssetLocation(assetCode: string, projectCode: string) {
-  const response = await apiClient.get<AssetLocationVerification>(
-    ENDPOINTS.assetLocationVerify(assetCode, projectCode),
+export async function getAssetsByOperator(employeeCode: string) {
+  const response = await apiClient.get<OperatorAsset[]>(
+    ENDPOINTS.assetsByOperator(employeeCode),
   );
   return response.data;
 }
@@ -51,6 +51,11 @@ export async function markFuelAsReceived(fuelIssueId: string) {
   const response = await apiClient.put<FuelReceived>(
     ENDPOINTS.fuelIssueMarkReceived(fuelIssueId),
   );
+  return response.data;
+}
+
+export async function getServiceFaultTypes() {
+  const response = await apiClient.get<ServiceFaultType[]>(ENDPOINTS.serviceFaultTypes);
   return response.data;
 }
 
@@ -87,6 +92,13 @@ export async function getIncomingGins(receivedProjectCode: string, page = 0, siz
 export async function getIncomingReturns(toProjectCode: string, page = 0, size = 10) {
   const response = await apiClient.get<PaginatedResponse<StockReturn>>(
     ENDPOINTS.returnIncoming(toProjectCode, page, size),
+  );
+  return response.data;
+}
+
+export async function getGinsReceivedBy(employeeCode: string, page = 0, size = 10) {
+  const response = await apiClient.get<PaginatedResponse<Gin>>(
+    ENDPOINTS.ginReceivedBy(employeeCode, page, size),
   );
   return response.data;
 }

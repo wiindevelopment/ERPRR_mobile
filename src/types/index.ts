@@ -11,11 +11,16 @@ export type LoginResponse = {
   [key: string]: unknown;
 };
 
-export type AssetLocationVerification = {
+export type ServiceFaultType = {
+  faultCode: string;
+  label: string;
+  category?: string;
+};
+
+export type OperatorAsset = {
   assetCode: string;
-  projectCode: string;
-  currentLocation: string | null;
-  correctLocation: boolean;
+  assetCodeId?: number;
+  assetClass?: string;
 };
 
 export type MeterReading = {
@@ -42,6 +47,8 @@ export type ServiceRequest = {
   operatorName: string;
   phoneNumber: string;
   maintenanceWorks: string;
+  requestType: string;
+  remarks?: string;
   isApproved?: boolean;
   createdAt?: string;
   updatedAt?: string;
@@ -69,7 +76,16 @@ export type GinItem = {
   amount?: number;
   lengthM?: number;
   widthM?: number;
+  stockBatchId?: string;
   assetCode?: string;
+  packItems?: GinPackItem[];
+};
+
+export type GinPackItem = {
+  packItemId?: number;
+  included?: boolean;
+  name?: string;
+  quantity?: number;
 };
 
 export type Gin = {
@@ -82,6 +98,7 @@ export type Gin = {
   receivedPerson?: string;
   vehicleNo?: string;
   vehicleAssetCode?: string;
+  forAssetCode?: string;
   approvedBy?: string;
   approvedDate?: string;
   isAuthorized?: boolean;

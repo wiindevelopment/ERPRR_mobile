@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
-import { Alert, KeyboardAvoidingView, Platform, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, KeyboardAvoidingView, Platform, SafeAreaView, ScrollView, StyleSheet } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/RootNavigator';
 import FormField from '../components/FormField';
+import AssetCodeSelect from '../components/AssetCodeSelect';
 import DefectMultiSelect from '../components/DefectMultiSelect';
+import RequestTypeSelect from '../components/RequestTypeSelect';
 import PrimaryButton from '../components/PrimaryButton';
 import { useAuth } from '../context/AuthContext';
-import { createServiceRequest, getServiceRequestsByProject, verifyAssetLocation } from '../api/services';
+import { createServiceRequest, getServiceRequestsByProject } from '../api/services';
 import { generateUuidV4 } from '../utils/uuid';
 import { joinDefects } from '../constants/maintenanceDefects';
 
@@ -15,55 +17,14 @@ export default function AddServiceRequestScreen({ navigation }: NativeStackScree
   const [assetCode, setAssetCode] = useState('');
   const [operatorName, setOperatorName] = useState(user?.employeeName ?? '');
   const [phoneNumber, setPhoneNumber] = useState('');
+  const [requestType, setRequestType] = useState('');
   const [maintenanceWorks, setMaintenanceWorks] = useState<string[]>([]);
+  const [remarks, setRemarks] = useState('');
   const [submitting, setSubmitting] = useState(false);
-  const [verifying, setVerifying] = useState(false);
-  const [verificationStatus, setVerificationStatus] = useState<'verified' | 'mismatch' | null>(null);
-
-  const handleAssetCodeChange = (text: string) => {
-    setAssetCode(text);
-    setVerificationStatus(null);
-  };
-
-  const handleVerifyLocation = async () => {
-    if (!assetCode.trim()) {
-      Alert.alert('Asset code required', 'Enter an asset code first.');
-      return;
-    }
-    if (!selectedProject?.projectCode) {
-      Alert.alert('No project selected', 'Select a project on the home screen before verifying.');
-      return;
-    }
-
-    try {
-      setVerifying(true);
-      const result = await verifyAssetLocation(assetCode.trim(), selectedProject.projectCode);
-      if (result.correctLocation) {
-        setVerificationStatus('verified');
-        Alert.alert(
-          'Location verified',
-          `Asset ${result.assetCode} is at ${result.currentLocation ?? selectedProject.projectName}, matching ${selectedProject.projectName}.`,
-        );
-      } else {
-        setVerificationStatus('mismatch');
-        Alert.alert(
-          'Location mismatch',
-          result.currentLocation
-            ? `Asset ${result.assetCode} is currently recorded at "${result.currentLocation}", not ${selectedProject.projectName} (${selectedProject.projectCode}).`
-            : `Asset ${result.assetCode} has no recorded location, so it cannot be confirmed at ${selectedProject.projectName} (${selectedProject.projectCode}).`,
-        );
-      }
-    } catch (error: any) {
-      setVerificationStatus(null);
-      Alert.alert('Verification failed', error?.response?.data?.message ?? error?.message ?? 'Could not verify asset location.');
-    } finally {
-      setVerifying(false);
-    }
-  };
 
   const submit = async () => {
     if (!assetCode.trim()) {
-      Alert.alert('Asset code required', 'Enter the asset code this request is for.');
+      Alert.alert('Asset code required', 'Select the asset code this request is for.');
       return;
     }
     if (!operatorName.trim()) {
@@ -74,16 +35,16 @@ export default function AddServiceRequestScreen({ navigation }: NativeStackScree
       Alert.alert('Phone number required', 'Enter a contact phone number.');
       return;
     }
+    if (!requestType) {
+      Alert.alert('Request type required', 'Select a request type.');
+      return;
+    }
     if (!maintenanceWorks.length) {
       Alert.alert('Maintenance works required', 'Select at least one defect.');
       return;
     }
     if (!selectedProject?.projectCode) {
       Alert.alert('No project selected', 'Select a project on the home screen before submitting a request.');
-      return;
-    }
-    if (verificationStatus !== 'verified') {
-      Alert.alert('Verify asset code', 'Verify the asset code location before submitting the request.');
       return;
     }
     if (!user?.employeeCode) return;
@@ -103,6 +64,8 @@ export default function AddServiceRequestScreen({ navigation }: NativeStackScree
         operatorName: operatorName.trim(),
         phoneNumber: phoneNumber.trim(),
         maintenanceWorks: joinDefects(maintenanceWorks),
+        requestType,
+        remarks: remarks.trim(),
       });
       Alert.alert('Saved', 'Service request submitted successfully.', [
         { text: 'OK', onPress: () => navigation.goBack() },
@@ -118,26 +81,23 @@ export default function AddServiceRequestScreen({ navigation }: NativeStackScree
     <SafeAreaView style={styles.safe}>
       <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
-          <View>
-            <View style={styles.assetRow}>
-              <View style={styles.assetField}>
-                <FormField label="Asset Code" placeholder="Enter asset code" autoCapitalize="characters" value={assetCode} onChangeText={handleAssetCodeChange} />
-              </View>
-              <Pressable style={styles.verifyButton} onPress={handleVerifyLocation} disabled={verifying}>
-                <Text style={styles.verifyButtonText}>{verifying ? 'Checking…' : 'Verify'}</Text>
-              </Pressable>
-            </View>
-            {verificationStatus ? (
-              <Text style={verificationStatus === 'verified' ? styles.verifiedText : styles.mismatchText}>
-                {verificationStatus === 'verified' ? 'Verified' : 'Not verified'}
-              </Text>
-            ) : null}
-          </View>
+          <AssetCodeSelect label="Asset Code" value={assetCode} onChange={setAssetCode} />
 
           <FormField label="Project" value={selectedProject?.projectName ?? 'No project selected'} editable={false} />
           <FormField label="Operator Name" placeholder="Enter operator name" value={operatorName} onChangeText={setOperatorName} />
           <FormField label="Phone Number" placeholder="Enter contact number" keyboardType="phone-pad" value={phoneNumber} onChangeText={setPhoneNumber} />
+          <RequestTypeSelect label="Request Type" value={requestType} onChange={setRequestType} />
           <DefectMultiSelect label="Maintenance Works" value={maintenanceWorks} onChange={setMaintenanceWorks} />
+          <FormField
+            label="Remarks"
+            placeholder="Optional remarks"
+            multiline
+            numberOfLines={4}
+            value={remarks}
+            onChangeText={setRemarks}
+            style={styles.remarksInput}
+            textAlignVertical="top"
+          />
 
           <PrimaryButton title="Submit Service Request" onPress={submit} loading={submitting} />
         </ScrollView>
@@ -150,13 +110,5 @@ const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: '#F7F8FA' },
   flex: { flex: 1 },
   container: { padding: 18, gap: 16, paddingBottom: 36 },
-  assetRow: { flexDirection: 'row', gap: 10, alignItems: 'flex-end' },
-  assetField: { flex: 1 },
-  verifyButton: {
-    backgroundColor: '#176B4D', borderRadius: 12, paddingHorizontal: 16,
-    height: 50, alignItems: 'center', justifyContent: 'center',
-  },
-  verifyButtonText: { color: '#FFFFFF', fontWeight: '700' },
-  verifiedText: { fontSize: 11, fontWeight: '700', color: '#176B4D', marginTop: 5 },
-  mismatchText: { fontSize: 11, fontWeight: '700', color: '#C0392B', marginTop: 5 },
+  remarksInput: { minHeight: 96, paddingTop: 14 },
 });

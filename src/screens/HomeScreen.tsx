@@ -71,13 +71,13 @@ export default function HomeScreen({ navigation }: NativeStackScreenProps<RootSt
           <Text style={styles.chevron}>›</Text>
         </Pressable>
 
-        <Pressable style={styles.actionCard} onPress={() => navigation.navigate('FuelReceived')}>
+        <Pressable style={styles.actionCard} onPress={() => navigation.navigate('ItemReceived')}>
           <View style={[styles.icon, styles.iconFuel]}>
-            <Ionicons name="flame-outline" size={24} color="#B9560F" />
+            <Ionicons name="cube-outline" size={24} color="#B9560F" />
           </View>
           <View style={styles.actionTextWrap}>
-            <Text style={styles.actionTitle}>Fuel Received</Text>
-            <Text style={styles.actionSubtitle}>Review deliveries and mark them received</Text>
+            <Text style={styles.actionTitle}>Item Received</Text>
+            <Text style={styles.actionSubtitle}>Review fuel and goods issued to you</Text>
           </View>
           <Text style={styles.chevron}>›</Text>
         </Pressable>
