@@ -1,6 +1,6 @@
 import apiClient from './client';
 import { ENDPOINTS } from './config';
-import { FuelReceived, Gin, LoginResponse, MeterReading, OperatorAsset, PaginatedResponse, ServiceRequest, StockReturn } from '../types';
+import { FuelReceived, Gin, LoginResponse, MeterReading, OperatorAsset, PaginatedResponse, ServiceFaultType, ServiceRequest, StockReturn } from '../types';
 
 export async function login(username: string, password: string) {
   const response = await apiClient.post<LoginResponse>(ENDPOINTS.login, {
@@ -51,6 +51,11 @@ export async function markFuelAsReceived(fuelIssueId: string) {
   const response = await apiClient.put<FuelReceived>(
     ENDPOINTS.fuelIssueMarkReceived(fuelIssueId),
   );
+  return response.data;
+}
+
+export async function getServiceFaultTypes() {
+  const response = await apiClient.get<ServiceFaultType[]>(ENDPOINTS.serviceFaultTypes);
   return response.data;
 }
 

@@ -21,6 +21,7 @@ export const ENDPOINTS = {
   fuelIssueMarkReceived: (fuelIssueId: string) =>
     `/api/fuel_issue/received/${encodeURIComponent(fuelIssueId)}`,
 
+  serviceFaultTypes: '/api/service-faults/types',
   serviceRequestCreate: '/api/service-request/',
   serviceRequestUpdate: '/api/service-request/',
   serviceRequestsByProject: (projectCode: string) =>

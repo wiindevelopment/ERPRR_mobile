@@ -11,6 +11,12 @@ export type LoginResponse = {
   [key: string]: unknown;
 };
 
+export type ServiceFaultType = {
+  faultCode: string;
+  label: string;
+  category?: string;
+};
+
 export type OperatorAsset = {
   assetCode: string;
   assetCodeId?: number;
