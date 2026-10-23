@@ -25,9 +25,9 @@ export async function createMeterReading(payload: MeterReading) {
   return response.data;
 }
 
-export async function updateMeterReading(meterReadingId: string, payload: MeterReading) {
+export async function updateMeterReading(meterReadingId: string, editedBy: string, payload: MeterReading) {
   const response = await apiClient.put<MeterReading>(
-    ENDPOINTS.meterReadingUpdate(meterReadingId),
+    ENDPOINTS.meterReadingUpdate(meterReadingId, editedBy),
     payload,
   );
   return response.data;

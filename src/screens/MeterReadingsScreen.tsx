@@ -93,7 +93,7 @@ export default function MeterReadingsScreen({ navigation }: NativeStackScreenPro
   };
 
   const saveEdit = async () => {
-    if (!selected?.meterReadingId) return;
+    if (!selected?.meterReadingId || !user?.employeeCode) return;
     const current = Number(readingValue);
     const previous = Number(previousReading);
 
@@ -108,7 +108,7 @@ export default function MeterReadingsScreen({ navigation }: NativeStackScreenPro
 
     try {
       setSaving(true);
-      const updated = await updateMeterReading(selected.meterReadingId, {
+      const updated = await updateMeterReading(selected.meterReadingId, user.employeeCode, {
         ...selected,
         meterType,
         readingValue: current,
