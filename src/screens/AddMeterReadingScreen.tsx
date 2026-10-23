@@ -34,7 +34,7 @@ export default function AddMeterReadingScreen({ navigation }: NativeStackScreenP
     const current = Number(readingValue);
     const previous = Number(previousReading);
     if (!readingValue || !previousReading || Number.isNaN(current) || Number.isNaN(previous)) return null;
-    if (current <= previous) return 'Reading value must be higher than the previous reading.';
+    if (current < previous) return 'Reading value cannot be less than the previous reading.';
     return null;
   }, [readingValue, previousReading]);
 
