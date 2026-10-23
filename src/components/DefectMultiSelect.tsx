@@ -37,8 +37,15 @@ export default function DefectMultiSelect({ label, value, onChange }: Props) {
   const filtered = useMemo(() => {
     const query = search.trim().toLowerCase();
     if (!query) return faults;
-    return faults.filter(fault => fault.label.toLowerCase().includes(query));
+    return faults.filter(fault =>
+      fault.label.toLowerCase().includes(query) || fault.sinhalaTranslation?.toLowerCase().includes(query),
+    );
   }, [faults, search]);
+
+  const sinhalaByLabel = useMemo(
+    () => new Map(faults.map(fault => [fault.label, fault.sinhalaTranslation])),
+    [faults],
+  );
 
   const toggle = (defect: string) => {
     onChange(value.includes(defect) ? value.filter(item => item !== defect) : [...value, defect]);
@@ -58,7 +65,10 @@ export default function DefectMultiSelect({ label, value, onChange }: Props) {
         {value.length ? (
           value.map(defect => (
             <View key={defect} style={styles.selectedRow}>
-              <Text style={styles.selectedText}>{defect}</Text>
+              <View style={styles.selectedTextWrap}>
+                <Text style={styles.selectedText}>{defect}</Text>
+                {sinhalaByLabel.get(defect) ? <Text style={styles.sinhalaText}>{sinhalaByLabel.get(defect)}</Text> : null}
+              </View>
               <Pressable onPress={() => remove(defect)} hitSlop={8}>
                 <Ionicons name="close-circle" size={18} color="#A9AFAC" />
               </Pressable>
@@ -83,7 +93,7 @@ export default function DefectMultiSelect({ label, value, onChange }: Props) {
             <Ionicons name="search" size={18} color="#8B929A" />
             <TextInput
               style={styles.searchInput}
-              placeholder="Search defect"
+              placeholder="Search defect / දෝෂය සොයන්න"
               placeholderTextColor="#8B929A"
               value={search}
               onChangeText={setSearch}
@@ -120,6 +130,7 @@ export default function DefectMultiSelect({ label, value, onChange }: Props) {
                     <Ionicons name={checked ? 'checkbox' : 'square-outline'} size={22} color={checked ? '#176B4D' : '#8B929A'} />
                     <View style={styles.optionTextWrap}>
                       <Text style={styles.optionText}>{item.label}</Text>
+                      {item.sinhalaTranslation ? <Text style={styles.sinhalaText}>{item.sinhalaTranslation}</Text> : null}
                       {item.category ? <Text style={styles.optionCategory}>{item.category}</Text> : null}
                     </View>
                   </Pressable>
@@ -145,7 +156,9 @@ const styles = StyleSheet.create({
   },
   placeholder: { color: '#8B929A', fontSize: 15 },
   selectedRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10 },
-  selectedText: { flex: 1, fontSize: 15, color: '#15191D' },
+  selectedTextWrap: { flex: 1, gap: 1 },
+  selectedText: { fontSize: 15, color: '#15191D' },
+  sinhalaText: { fontSize: 14, color: '#3F4A45' },
   addButton: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingTop: 4 },
   addButtonText: { color: '#1D5FA8', fontWeight: '700' },
   modalSafe: { flex: 1, backgroundColor: '#F7F8FA' },

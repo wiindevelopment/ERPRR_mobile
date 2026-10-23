@@ -9,6 +9,7 @@ import { getMeterReadings, updateMeterReading } from '../api/services';
 import { MeterReading } from '../types';
 import PrimaryButton from '../components/PrimaryButton';
 import FormField from '../components/FormField';
+import KeyboardAwareScrollView, { useKeyboardHeight } from '../components/KeyboardAwareScrollView';
 
 const METER_TYPES = ['Odometer - km', 'Hour meter - hr'];
 const EDIT_WINDOW_MS = 15 * 60 * 1000;
@@ -42,6 +43,7 @@ export default function MeterReadingsScreen({ navigation }: NativeStackScreenPro
   const [previousReading, setPreviousReading] = useState('');
   const [remarks, setRemarks] = useState('');
   const [saving, setSaving] = useState(false);
+  const keyboardHeight = useKeyboardHeight();
 
   const load = useCallback(async (showLoader = true) => {
     if (!user?.employeeCode) return;
@@ -153,8 +155,9 @@ export default function MeterReadingsScreen({ navigation }: NativeStackScreenPro
       </View>
 
       <Modal visible={!!selected} animationType="slide" transparent onRequestClose={closeModal}>
-        <Pressable style={styles.modalBackdrop} onPress={closeModal}>
-          <Pressable style={styles.modalSheet} onPress={() => {}}>
+        <View style={[styles.modalBackdrop, { paddingBottom: keyboardHeight }]}>
+          <Pressable style={StyleSheet.absoluteFill} onPress={closeModal} />
+          <View style={styles.modalSheet}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>{editing ? 'Edit reading' : 'Reading details'}</Text>
               {selected && !editing ? (
@@ -168,6 +171,7 @@ export default function MeterReadingsScreen({ navigation }: NativeStackScreenPro
               ) : null}
             </View>
 
+            <KeyboardAwareScrollView style={styles.modalScroll} padForKeyboard={false}>
             {selected && !editing ? (
               <View style={styles.detailList}>
                 <DetailRow label="Asset Code" value={selected.assetCode} />
@@ -203,12 +207,13 @@ export default function MeterReadingsScreen({ navigation }: NativeStackScreenPro
                 <PrimaryButton title="Save Changes" onPress={saveEdit} loading={saving} />
               </View>
             ) : null}
+            </KeyboardAwareScrollView>
 
             <Pressable style={styles.closeButton} onPress={closeModal}>
               <Text style={styles.closeButtonText}>Close</Text>
             </Pressable>
-          </Pressable>
-        </Pressable>
+          </View>
+        </View>
       </Modal>
     </SafeAreaView>
   );
@@ -239,6 +244,7 @@ const styles = StyleSheet.create({
   date: { flex: 1, color: '#7A817D', fontSize: 12 },
   divider: { width: 1, alignSelf: 'stretch', marginVertical: 4, backgroundColor: '#E5E8E6' },
   eyeButton: { padding: 4 },
+  modalScroll: { flexShrink: 1 },
   modalBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'flex-end' },
   modalSheet: {
     backgroundColor: '#FFFFFF', borderTopLeftRadius: 24, borderTopRightRadius: 24,

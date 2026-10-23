@@ -1,8 +1,9 @@
 import React, { useMemo, useState } from 'react';
-import { Alert, KeyboardAvoidingView, Platform, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, SafeAreaView, StyleSheet, Text, View } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/RootNavigator';
 import FormField from '../components/FormField';
+import KeyboardAwareScrollView from '../components/KeyboardAwareScrollView';
 import AssetCodeSelect from '../components/AssetCodeSelect';
 import PrimaryButton from '../components/PrimaryButton';
 import { useAuth } from '../context/AuthContext';
@@ -76,8 +77,7 @@ export default function AddMeterReadingScreen({ navigation }: NativeStackScreenP
 
   return (
     <SafeAreaView style={styles.safe}>
-      <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-        <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+      <KeyboardAwareScrollView contentContainerStyle={styles.container}>
           <AssetCodeSelect label="Asset Code" value={assetCodeId} onChange={setAssetCodeId} />
 
           <View style={styles.fieldGroup}>
@@ -103,15 +103,13 @@ export default function AddMeterReadingScreen({ navigation }: NativeStackScreenP
           <FormField label="Remarks" placeholder="Optional remarks" multiline numberOfLines={4} value={remarks} onChangeText={setRemarks} style={styles.remarksInput} textAlignVertical="top" />
 
           <PrimaryButton title="Submit Meter Reading" onPress={submit} loading={submitting} />
-        </ScrollView>
-      </KeyboardAvoidingView>
+      </KeyboardAwareScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: '#F7F8FA' },
-  flex: { flex: 1 },
   container: { padding: 18, gap: 16, paddingBottom: 36 },
   errorText: { fontSize: 12, fontWeight: '700', color: '#C0392B', marginTop: -8 },
   fieldGroup: { gap: 8 },

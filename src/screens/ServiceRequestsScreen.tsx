@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import React, { useCallback, useState } from 'react';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { ActivityIndicator, Alert, FlatList, Modal, Pressable, RefreshControl, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, FlatList, Modal, Pressable, RefreshControl, SafeAreaView, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { RootStackParamList } from '../navigation/RootNavigator';
 import { useAuth } from '../context/AuthContext';
@@ -9,6 +9,7 @@ import { getServiceRequestsByProject, updateServiceRequest } from '../api/servic
 import { ServiceRequest } from '../types';
 import PrimaryButton from '../components/PrimaryButton';
 import FormField from '../components/FormField';
+import KeyboardAwareScrollView, { useKeyboardHeight } from '../components/KeyboardAwareScrollView';
 import AssetCodeSelect from '../components/AssetCodeSelect';
 import DefectMultiSelect from '../components/DefectMultiSelect';
 import RequestTypeSelect from '../components/RequestTypeSelect';
@@ -43,6 +44,7 @@ export default function ServiceRequestsScreen({ navigation }: NativeStackScreenP
   const [maintenanceWorks, setMaintenanceWorks] = useState<string[]>([]);
   const [remarks, setRemarks] = useState('');
   const [saving, setSaving] = useState(false);
+  const keyboardHeight = useKeyboardHeight();
 
   const load = useCallback(async (showLoader = true) => {
     if (!selectedProject?.projectCode) return;
@@ -146,7 +148,7 @@ export default function ServiceRequestsScreen({ navigation }: NativeStackScreenP
       </View>
 
       <Modal visible={!!selected} animationType="slide" transparent onRequestClose={closeModal}>
-        <View style={styles.modalBackdrop}>
+        <View style={[styles.modalBackdrop, { paddingBottom: keyboardHeight }]}>
           <Pressable style={StyleSheet.absoluteFill} onPress={closeModal} />
           <View style={styles.modalSheet}>
             <View style={styles.modalHeader}>
@@ -162,7 +164,7 @@ export default function ServiceRequestsScreen({ navigation }: NativeStackScreenP
               ) : null}
             </View>
 
-            <ScrollView style={styles.modalScroll} keyboardShouldPersistTaps="handled">
+            <KeyboardAwareScrollView style={styles.modalScroll} padForKeyboard={false}>
             {selected && !editing ? (
               <View style={styles.detailList}>
                 <DetailRow label="Service Code" value={display(selected.serviceRequestCode)} />
@@ -199,7 +201,7 @@ export default function ServiceRequestsScreen({ navigation }: NativeStackScreenP
                 <PrimaryButton title="Save Changes" onPress={saveEdit} loading={saving} />
               </View>
             ) : null}
-            </ScrollView>
+            </KeyboardAwareScrollView>
 
             <Pressable style={styles.closeButton} onPress={closeModal}>
               <Text style={styles.closeButtonText}>Close</Text>

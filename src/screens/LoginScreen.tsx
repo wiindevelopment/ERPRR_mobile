@@ -1,8 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import React, { useState } from 'react';
-import { Alert, KeyboardAvoidingView, Platform, Pressable, SafeAreaView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, SafeAreaView, StyleSheet, Text, View } from 'react-native';
 import FormField from '../components/FormField';
+import KeyboardAwareScrollView from '../components/KeyboardAwareScrollView';
 import PrimaryButton from '../components/PrimaryButton';
 import { useAuth } from '../context/AuthContext';
 
@@ -32,10 +33,7 @@ export default function LoginScreen() {
   return (
     <LinearGradient colors={['#0E3B2A', '#176B4D', '#2FA574']} style={styles.gradient}>
       <SafeAreaView style={styles.safe}>
-        <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-          style={styles.container}
-        >
+        <KeyboardAwareScrollView contentContainerStyle={styles.container}>
           <View style={styles.card}>
             <Text style={styles.eyebrow}>FIELD OPERATIONS</Text>
             <Text style={styles.title}>Meter & Fuel</Text>
@@ -64,7 +62,7 @@ export default function LoginScreen() {
               <PrimaryButton title="Login" onPress={handleLogin} loading={loading} />
             </View>
           </View>
-        </KeyboardAvoidingView>
+        </KeyboardAwareScrollView>
       </SafeAreaView>
     </LinearGradient>
   );
@@ -73,7 +71,7 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   gradient: { flex: 1 },
   safe: { flex: 1 },
-  container: { flex: 1, justifyContent: 'center', padding: 22 },
+  container: { flexGrow: 1, justifyContent: 'center', padding: 22 },
   card: { backgroundColor: '#FFFFFF', borderRadius: 24, padding: 24, gap: 6 },
   eyebrow: { fontSize: 12, fontWeight: '800', letterSpacing: 1.5, color: '#176B4D' },
   title: { fontSize: 32, fontWeight: '800', color: '#111715', marginTop: 3 },

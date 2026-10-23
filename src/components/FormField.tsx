@@ -1,5 +1,6 @@
 import React from 'react';
 import { StyleSheet, Text, TextInput, TextInputProps, View } from 'react-native';
+import { notifyInputFocused } from './KeyboardAwareScrollView';
 
 type Props = TextInputProps & {
   label: string;
@@ -13,6 +14,10 @@ export default function FormField({ label, style, rightAccessory, ...props }: Pr
       <View style={styles.inputRow}>
         <TextInput
           {...props}
+          onFocus={event => {
+            props.onFocus?.(event);
+            notifyInputFocused();
+          }}
           placeholderTextColor="#8B929A"
           style={[
             styles.input,

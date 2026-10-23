@@ -15,6 +15,7 @@ export type ServiceFaultType = {
   faultCode: string;
   label: string;
   category?: string;
+  sinhalaTranslation?: string;
 };
 
 export type OperatorAsset = {

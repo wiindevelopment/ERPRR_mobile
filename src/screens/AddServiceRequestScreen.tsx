@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Alert, KeyboardAvoidingView, Platform, SafeAreaView, ScrollView, StyleSheet } from 'react-native';
+import { Alert, SafeAreaView, StyleSheet } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/RootNavigator';
 import FormField from '../components/FormField';
+import KeyboardAwareScrollView from '../components/KeyboardAwareScrollView';
 import AssetCodeSelect from '../components/AssetCodeSelect';
 import DefectMultiSelect from '../components/DefectMultiSelect';
 import RequestTypeSelect from '../components/RequestTypeSelect';
@@ -79,8 +80,7 @@ export default function AddServiceRequestScreen({ navigation }: NativeStackScree
 
   return (
     <SafeAreaView style={styles.safe}>
-      <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-        <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+      <KeyboardAwareScrollView contentContainerStyle={styles.container}>
           <AssetCodeSelect label="Asset Code" value={assetCode} onChange={setAssetCode} />
 
           <FormField label="Project" value={selectedProject?.projectName ?? 'No project selected'} editable={false} />
@@ -100,15 +100,13 @@ export default function AddServiceRequestScreen({ navigation }: NativeStackScree
           />
 
           <PrimaryButton title="Submit Service Request" onPress={submit} loading={submitting} />
-        </ScrollView>
-      </KeyboardAvoidingView>
+      </KeyboardAwareScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: '#F7F8FA' },
-  flex: { flex: 1 },
   container: { padding: 18, gap: 16, paddingBottom: 36 },
   remarksInput: { minHeight: 96, paddingTop: 14 },
 });
