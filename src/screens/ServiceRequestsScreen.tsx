@@ -9,7 +9,7 @@ import { getServiceRequestsByProject, updateServiceRequest } from '../api/servic
 import { ServiceRequest } from '../types';
 import PrimaryButton from '../components/PrimaryButton';
 import FormField from '../components/FormField';
-import KeyboardAwareScrollView, { useKeyboardHeight } from '../components/KeyboardAwareScrollView';
+import KeyboardAwareScrollView, { useModalKeyboardInset } from '../components/KeyboardAwareScrollView';
 import AssetCodeSelect from '../components/AssetCodeSelect';
 import DefectMultiSelect from '../components/DefectMultiSelect';
 import RequestTypeSelect from '../components/RequestTypeSelect';
@@ -44,7 +44,7 @@ export default function ServiceRequestsScreen({ navigation }: NativeStackScreenP
   const [maintenanceWorks, setMaintenanceWorks] = useState<string[]>([]);
   const [remarks, setRemarks] = useState('');
   const [saving, setSaving] = useState(false);
-  const keyboardHeight = useKeyboardHeight();
+  const keyboardHeight = useModalKeyboardInset();
 
   const load = useCallback(async (showLoader = true) => {
     if (!selectedProject?.projectCode) {

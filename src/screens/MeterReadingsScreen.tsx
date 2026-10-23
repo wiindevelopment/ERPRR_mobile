@@ -9,7 +9,7 @@ import { getMeterReadings, updateMeterReading } from '../api/services';
 import { MeterReading } from '../types';
 import PrimaryButton from '../components/PrimaryButton';
 import FormField from '../components/FormField';
-import KeyboardAwareScrollView, { useKeyboardHeight } from '../components/KeyboardAwareScrollView';
+import KeyboardAwareScrollView, { useModalKeyboardInset } from '../components/KeyboardAwareScrollView';
 
 const METER_TYPES = ['Odometer - km', 'Hour meter - hr'];
 const EDIT_WINDOW_MS = 15 * 60 * 1000;
@@ -43,7 +43,7 @@ export default function MeterReadingsScreen({ navigation }: NativeStackScreenPro
   const [previousReading, setPreviousReading] = useState('');
   const [remarks, setRemarks] = useState('');
   const [saving, setSaving] = useState(false);
-  const keyboardHeight = useKeyboardHeight();
+  const keyboardHeight = useModalKeyboardInset();
 
   const load = useCallback(async (showLoader = true) => {
     if (!user?.employeeCode) return;
