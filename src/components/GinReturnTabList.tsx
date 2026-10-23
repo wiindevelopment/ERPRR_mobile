@@ -46,7 +46,13 @@ export default function GinReturnTabList({
   const [verifying, setVerifying] = useState(false);
 
   const load = useCallback(async (showLoader = true) => {
-    if (!selectedProject?.projectCode) return;
+    if (!selectedProject?.projectCode) {
+      setGins([]);
+      setReturns([]);
+      setLoading(false);
+      setRefreshing(false);
+      return;
+    }
     try {
       if (showLoader) setLoading(true);
       const [ginData, returnData] = await Promise.all([

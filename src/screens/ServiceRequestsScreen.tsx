@@ -47,7 +47,12 @@ export default function ServiceRequestsScreen({ navigation }: NativeStackScreenP
   const keyboardHeight = useKeyboardHeight();
 
   const load = useCallback(async (showLoader = true) => {
-    if (!selectedProject?.projectCode) return;
+    if (!selectedProject?.projectCode) {
+      setItems([]);
+      setLoading(false);
+      setRefreshing(false);
+      return;
+    }
     try {
       if (showLoader) setLoading(true);
       const data = await getServiceRequestsByProject(selectedProject.projectCode);
@@ -128,7 +133,11 @@ export default function ServiceRequestsScreen({ navigation }: NativeStackScreenP
           keyExtractor={(item, index) => item.serviceRequestId ?? String(index)}
           contentContainerStyle={items.length ? styles.list : styles.emptyList}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(false); }} />}
-          ListEmptyComponent={<Text style={styles.empty}>No service requests submitted for this project yet.</Text>}
+          ListEmptyComponent={
+            <Text style={styles.empty}>
+              {selectedProject ? 'No service requests submitted for this project yet.' : 'Select a project on the home screen first.'}
+            </Text>
+          }
           renderItem={({ item }) => (
             <View style={styles.row}>
               <Text style={styles.assetCode} numberOfLines={1}>{display(item.assetCode)}</Text>
