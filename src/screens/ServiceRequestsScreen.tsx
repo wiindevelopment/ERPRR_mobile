@@ -9,7 +9,7 @@ import { getServiceRequestsByProject, updateServiceRequest } from '../api/servic
 import { ServiceRequest } from '../types';
 import PrimaryButton from '../components/PrimaryButton';
 import FormField from '../components/FormField';
-import KeyboardAwareScrollView, { useKeyboardHeight } from '../components/KeyboardAwareScrollView';
+import KeyboardAwareScrollView, { useModalKeyboardInset } from '../components/KeyboardAwareScrollView';
 import AssetCodeSelect from '../components/AssetCodeSelect';
 import DefectMultiSelect from '../components/DefectMultiSelect';
 import RequestTypeSelect from '../components/RequestTypeSelect';
@@ -44,7 +44,7 @@ export default function ServiceRequestsScreen({ navigation }: NativeStackScreenP
   const [maintenanceWorks, setMaintenanceWorks] = useState<string[]>([]);
   const [remarks, setRemarks] = useState('');
   const [saving, setSaving] = useState(false);
-  const keyboardHeight = useKeyboardHeight();
+  const keyboardHeight = useModalKeyboardInset();
 
   const load = useCallback(async (showLoader = true) => {
     if (!selectedProject?.projectCode) {
@@ -94,8 +94,13 @@ export default function ServiceRequestsScreen({ navigation }: NativeStackScreenP
 
   const saveEdit = async () => {
     if (!selected) return;
-    if (!assetCode.trim() || !operatorName.trim() || !phoneNumber.trim() || !requestType || !maintenanceWorks.length) {
-      Alert.alert('Check inputs', 'Fill in asset code, operator name, phone number, request type and at least one maintenance defect.');
+    if (!assetCode.trim() || !operatorName.trim() || !phoneNumber.trim() || !requestType) {
+      Alert.alert('Check inputs', 'Fill in asset code, operator name, phone number and request type.');
+      return;
+    }
+    // Issues not on the defect list (and accidents) can be described in remarks instead.
+    if (!maintenanceWorks.length && !remarks.trim()) {
+      Alert.alert('Describe the issue', 'Select at least one defect, or describe the issue in Remarks.');
       return;
     }
 
@@ -199,7 +204,7 @@ export default function ServiceRequestsScreen({ navigation }: NativeStackScreenP
                 <DefectMultiSelect label="Maintenance Works" value={maintenanceWorks} onChange={setMaintenanceWorks} />
                 <FormField
                   label="Remarks"
-                  placeholder="Optional remarks"
+                  placeholder="Describe issues not in the list, or accident details"
                   multiline
                   numberOfLines={3}
                   value={remarks}

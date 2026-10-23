@@ -40,8 +40,9 @@ export default function AddServiceRequestScreen({ navigation }: NativeStackScree
       Alert.alert('Request type required', 'Select a request type.');
       return;
     }
-    if (!maintenanceWorks.length) {
-      Alert.alert('Maintenance works required', 'Select at least one defect.');
+    // Issues not on the defect list (and accidents) can be described in remarks instead.
+    if (!maintenanceWorks.length && !remarks.trim()) {
+      Alert.alert('Describe the issue', 'Select at least one defect, or describe the issue in Remarks.');
       return;
     }
     if (!selectedProject?.projectCode) {
@@ -90,7 +91,7 @@ export default function AddServiceRequestScreen({ navigation }: NativeStackScree
           <DefectMultiSelect label="Maintenance Works" value={maintenanceWorks} onChange={setMaintenanceWorks} />
           <FormField
             label="Remarks"
-            placeholder="Optional remarks"
+            placeholder="Describe issues not in the list, or accident details"
             multiline
             numberOfLines={4}
             value={remarks}

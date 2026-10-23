@@ -9,7 +9,7 @@ import { getMeterReadings, updateMeterReading } from '../api/services';
 import { MeterReading } from '../types';
 import PrimaryButton from '../components/PrimaryButton';
 import FormField from '../components/FormField';
-import KeyboardAwareScrollView, { useKeyboardHeight } from '../components/KeyboardAwareScrollView';
+import KeyboardAwareScrollView, { useModalKeyboardInset } from '../components/KeyboardAwareScrollView';
 
 const METER_TYPES = ['Odometer - km', 'Hour meter - hr'];
 const EDIT_WINDOW_MS = 15 * 60 * 1000;
@@ -43,7 +43,7 @@ export default function MeterReadingsScreen({ navigation }: NativeStackScreenPro
   const [previousReading, setPreviousReading] = useState('');
   const [remarks, setRemarks] = useState('');
   const [saving, setSaving] = useState(false);
-  const keyboardHeight = useKeyboardHeight();
+  const keyboardHeight = useModalKeyboardInset();
 
   const load = useCallback(async (showLoader = true) => {
     if (!user?.employeeCode) return;
@@ -65,7 +65,7 @@ export default function MeterReadingsScreen({ navigation }: NativeStackScreenPro
     const current = Number(readingValue);
     const previous = Number(previousReading);
     if (!readingValue || !previousReading || Number.isNaN(current) || Number.isNaN(previous)) return null;
-    if (current <= previous) return 'Reading value must be higher than the previous reading.';
+    if (current < previous) return 'Reading value cannot be less than the previous reading.';
     return null;
   }, [readingValue, previousReading]);
 
@@ -93,7 +93,7 @@ export default function MeterReadingsScreen({ navigation }: NativeStackScreenPro
   };
 
   const saveEdit = async () => {
-    if (!selected?.meterReadingId) return;
+    if (!selected?.meterReadingId || !user?.employeeCode) return;
     const current = Number(readingValue);
     const previous = Number(previousReading);
 
@@ -108,7 +108,7 @@ export default function MeterReadingsScreen({ navigation }: NativeStackScreenPro
 
     try {
       setSaving(true);
-      const updated = await updateMeterReading(selected.meterReadingId, {
+      const updated = await updateMeterReading(selected.meterReadingId, user.employeeCode, {
         ...selected,
         meterType,
         readingValue: current,

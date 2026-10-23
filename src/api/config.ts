@@ -10,8 +10,8 @@ export const ENDPOINTS = {
   meterReadingCreate: '/api/meter_reading/',
   meterReadingsByUser: (employeeCode: string) =>
     `/api/meter_reading/${encodeURIComponent(employeeCode)}`,
-  meterReadingUpdate: (meterReadingId: string) =>
-    `/api/meter_reading/${encodeURIComponent(meterReadingId)}`,
+  meterReadingUpdate: (meterReadingId: string, editedBy: string) =>
+    `/api/meter_reading/${encodeURIComponent(meterReadingId)}?editedBy=${encodeURIComponent(editedBy)}`,
 
   assetsByOperator: (employeeCode: string) =>
     `/api/assets/by-operator/${encodeURIComponent(employeeCode)}`,

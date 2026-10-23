@@ -28,6 +28,16 @@ export function useKeyboardHeight() {
   return height;
 }
 
+/**
+ * Bottom inset that keeps a bottom sheet inside a <Modal> above the keyboard.
+ * On Android the Modal's own window already resizes for the keyboard, so adding the
+ * keyboard height again would lift the sheet twice; only iOS needs the inset.
+ */
+export function useModalKeyboardInset() {
+  const height = useKeyboardHeight();
+  return Platform.OS === 'ios' ? height : 0;
+}
+
 type Props = ScrollViewProps & {
   /** Space to keep between the focused input and the top of the keyboard. */
   extraOffset?: number;
