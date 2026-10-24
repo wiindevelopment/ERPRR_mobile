@@ -7,6 +7,7 @@ import { RootStackParamList } from '../navigation/RootNavigator';
 import { useAuth } from '../context/AuthContext';
 import { getMeterReadings, updateMeterReading } from '../api/services';
 import { MeterReading } from '../types';
+import { formatNumber, formatNumberInput, parseNumberInput } from '../utils/number';
 import PrimaryButton from '../components/PrimaryButton';
 import FormField from '../components/FormField';
 import KeyboardAwareScrollView, { useModalKeyboardInset } from '../components/KeyboardAwareScrollView';
@@ -62,8 +63,8 @@ export default function MeterReadingsScreen({ navigation }: NativeStackScreenPro
   useFocusEffect(useCallback(() => { load(); }, [load]));
 
   const readingError = useMemo(() => {
-    const current = Number(readingValue);
-    const previous = Number(previousReading);
+    const current = parseNumberInput(readingValue);
+    const previous = parseNumberInput(previousReading);
     if (!readingValue || !previousReading || Number.isNaN(current) || Number.isNaN(previous)) return null;
     if (current < previous) return 'Reading value cannot be less than the previous reading.';
     return null;
@@ -81,8 +82,8 @@ export default function MeterReadingsScreen({ navigation }: NativeStackScreenPro
       return;
     }
     setMeterType(selected.meterType);
-    setReadingValue(String(selected.readingValue));
-    setPreviousReading(String(selected.previousReading));
+    setReadingValue(formatNumberInput(String(selected.readingValue)));
+    setPreviousReading(formatNumberInput(String(selected.previousReading)));
     setRemarks(selected.remarks ?? '');
     setEditing(true);
   };
@@ -94,8 +95,8 @@ export default function MeterReadingsScreen({ navigation }: NativeStackScreenPro
 
   const saveEdit = async () => {
     if (!selected?.meterReadingId || !user?.employeeCode) return;
-    const current = Number(readingValue);
-    const previous = Number(previousReading);
+    const current = parseNumberInput(readingValue);
+    const previous = parseNumberInput(previousReading);
 
     if (!readingValue || Number.isNaN(current) || !previousReading || Number.isNaN(previous)) {
       Alert.alert('Check inputs', 'Enter a valid reading value and previous reading value.');
@@ -143,7 +144,7 @@ export default function MeterReadingsScreen({ navigation }: NativeStackScreenPro
           renderItem={({ item }) => (
             <View style={styles.row}>
               <Text style={styles.assetCode} numberOfLines={1}>{item.assetCode}</Text>
-              <Text style={styles.value} numberOfLines={1}>{item.readingValue} {getUnit(item.meterType)}</Text>
+              <Text style={styles.value} numberOfLines={1}>{formatNumber(item.readingValue)} {getUnit(item.meterType)}</Text>
               <Text style={styles.date} numberOfLines={1}>{formatReadingDate(item.readingDate)}</Text>
               <View style={styles.divider} />
               <Pressable style={styles.eyeButton} onPress={() => openDetails(item)} hitSlop={8}>
@@ -177,9 +178,9 @@ export default function MeterReadingsScreen({ navigation }: NativeStackScreenPro
                 <DetailRow label="Asset Code" value={selected.assetCode} />
                 <DetailRow label="Meter Type" value={selected.meterType} />
                 <DetailRow label="Reading Date" value={formatReadingDate(selected.readingDate)} />
-                <DetailRow label="Reading Value" value={`${selected.readingValue} ${getUnit(selected.meterType)}`} />
-                <DetailRow label="Previous Reading" value={`${selected.previousReading} ${getUnit(selected.meterType)}`} />
-                <DetailRow label="Usage" value={`${selected.usageValue} ${getUnit(selected.meterType)}`} />
+                <DetailRow label="Reading Value" value={`${formatNumber(selected.readingValue)} ${getUnit(selected.meterType)}`} />
+                <DetailRow label="Previous Reading" value={`${formatNumber(selected.previousReading)} ${getUnit(selected.meterType)}`} />
+                <DetailRow label="Usage" value={`${formatNumber(selected.usageValue)} ${getUnit(selected.meterType)}`} />
                 <DetailRow label="Recorded By" value={selected.recordedBy} />
                 <DetailRow label="Remarks" value={selected.remarks || 'No remarks'} />
               </View>
@@ -200,8 +201,8 @@ export default function MeterReadingsScreen({ navigation }: NativeStackScreenPro
                     })}
                   </View>
                 </View>
-                <FormField label="Reading Value" keyboardType="decimal-pad" value={readingValue} onChangeText={setReadingValue} />
-                <FormField label="Previous Reading" keyboardType="decimal-pad" value={previousReading} onChangeText={setPreviousReading} />
+                <FormField label="Reading Value" keyboardType="decimal-pad" value={readingValue} onChangeText={text => setReadingValue(formatNumberInput(text))} />
+                <FormField label="Previous Reading" keyboardType="decimal-pad" value={previousReading} onChangeText={text => setPreviousReading(formatNumberInput(text))} />
                 {readingError ? <Text style={styles.errorText}>{readingError}</Text> : null}
                 <FormField label="Remarks" placeholder="Optional remarks" multiline numberOfLines={3} value={remarks} onChangeText={setRemarks} textAlignVertical="top" />
                 <PrimaryButton title="Save Changes" onPress={saveEdit} loading={saving} />

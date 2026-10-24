@@ -5,6 +5,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { useAuth } from '../context/AuthContext';
 import { getGinsReceivedBy } from '../api/services';
 import { Gin } from '../types';
+import { formatNumber } from '../utils/number';
 
 const PAGE_SIZE = 10;
 
@@ -124,7 +125,7 @@ export default function GoodsReceivedScreen() {
                     <Text style={styles.itemsTitle}>Item breakdown ({selected.items?.length ?? 0})</Text>
                     {selected.items?.some(lineItem => lineItem.amount != null) ? (
                       <Text style={styles.itemsTotal}>
-                        Total {formatNumber(selected.items.reduce((sum, lineItem) => sum + (lineItem.amount ?? 0), 0))}
+                        Total {formatNumber(selected.items.reduce((sum, lineItem) => sum + (lineItem.amount ?? 0), 0), 2)}
                       </Text>
                     ) : null}
                   </View>
@@ -137,12 +138,12 @@ export default function GoodsReceivedScreen() {
                         </View>
                         <ItemField label="Item Code" value={lineItem.itemCode} />
                         <ItemField label="Size" value={lineItem.size} />
-                        <ItemField label="Quantity" value={lineItem.quantity} />
+                        <ItemField label="Quantity" value={formatNumber(lineItem.quantity)} />
                         <ItemField label="UOM" value={lineItem.uom} />
                         <ItemField label="Length (m)" value={lineItem.lengthM || undefined} />
                         <ItemField label="Width (m)" value={lineItem.widthM || undefined} />
-                        <ItemField label="Unit Price" value={lineItem.unitPrice != null ? formatNumber(lineItem.unitPrice) : undefined} />
-                        <ItemField label="Amount" value={lineItem.amount != null ? formatNumber(lineItem.amount) : undefined} />
+                        <ItemField label="Unit Price" value={lineItem.unitPrice != null ? formatNumber(lineItem.unitPrice, 2) : undefined} />
+                        <ItemField label="Amount" value={lineItem.amount != null ? formatNumber(lineItem.amount, 2) : undefined} />
                         <ItemField label="Asset Code" value={lineItem.assetCode} />
                         <ItemField label="Remarks" value={lineItem.remarks} />
                         {lineItem.packItems?.length ? (
@@ -156,7 +157,7 @@ export default function GoodsReceivedScreen() {
                                   color={pack.included ? '#176B4D' : '#A9AFAC'}
                                 />
                                 <Text style={styles.packName}>{display(pack.name)}</Text>
-                                <Text style={styles.itemQty}>{display(pack.quantity)}</Text>
+                                <Text style={styles.itemQty}>{display(formatNumber(pack.quantity))}</Text>
                               </View>
                             ))}
                           </View>
@@ -174,10 +175,6 @@ export default function GoodsReceivedScreen() {
       </Modal>
     </SafeAreaView>
   );
-}
-
-function formatNumber(value: number) {
-  return value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
 function ItemField({ label, value }: { label: string; value: unknown }) {

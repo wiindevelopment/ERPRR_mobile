@@ -3,6 +3,12 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 export const REQUEST_TYPES = ['Breakdown', 'Faults', 'Accident'];
 
+// The server stores types upper-cased (e.g. ACCIDENT), so compare case-insensitively.
+export const isRequestType = (value: string | undefined, type: string) => (value ?? '').toUpperCase() === type.toUpperCase();
+
+// Breakdowns and accidents may be described in remarks alone; faults need at least one defect.
+export const requiresDefect = (requestType: string) => isRequestType(requestType, 'Faults');
+
 type Props = {
   label: string;
   value: string;
@@ -15,7 +21,7 @@ export default function RequestTypeSelect({ label, value, onChange }: Props) {
       <Text style={styles.label}>{label}</Text>
       <View style={styles.chips}>
         {REQUEST_TYPES.map(type => {
-          const selected = value === type;
+          const selected = isRequestType(value, type);
           return (
             <Pressable key={type} style={[styles.chip, selected && styles.chipSelected]} onPress={() => onChange(type)}>
               <Text style={[styles.chipText, selected && styles.chipTextSelected]}>{type}</Text>

@@ -12,7 +12,7 @@ import FormField from '../components/FormField';
 import KeyboardAwareScrollView, { useModalKeyboardInset } from '../components/KeyboardAwareScrollView';
 import AssetCodeSelect from '../components/AssetCodeSelect';
 import DefectMultiSelect from '../components/DefectMultiSelect';
-import RequestTypeSelect from '../components/RequestTypeSelect';
+import RequestTypeSelect, { requiresDefect } from '../components/RequestTypeSelect';
 import { joinDefects, parseDefects } from '../constants/maintenanceDefects';
 
 function display(value: unknown, fallback = '-') {
@@ -98,9 +98,13 @@ export default function ServiceRequestsScreen({ navigation }: NativeStackScreenP
       Alert.alert('Check inputs', 'Fill in asset code, operator name, phone number and request type.');
       return;
     }
-    // Issues not on the defect list (and accidents) can be described in remarks instead.
+    if (!maintenanceWorks.length && requiresDefect(requestType)) {
+      Alert.alert('Defect required', 'Select at least one defect for a Faults request.');
+      return;
+    }
+    // Breakdowns and accidents not on the defect list can be described in remarks instead.
     if (!maintenanceWorks.length && !remarks.trim()) {
-      Alert.alert('Describe the issue', 'Select at least one defect, or describe the issue in Remarks.');
+      Alert.alert('Describe the issue', 'Select at least one defect, or describe the breakdown/accident in Remarks.');
       return;
     }
 

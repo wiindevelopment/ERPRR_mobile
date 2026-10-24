@@ -5,6 +5,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { useAuth } from '../context/AuthContext';
 import { getFuelReceived, markFuelAsReceived } from '../api/services';
 import { FuelReceived } from '../types';
+import { formatNumber } from '../utils/number';
 
 function display(value: unknown, fallback = '-') {
   return value === undefined || value === null || value === '' ? fallback : String(value);
@@ -64,7 +65,7 @@ export default function FuelReceivedScreen() {
           return (
             <View style={styles.row}>
               <Text style={styles.assetCode} numberOfLines={1}>{display(item.assetCode)}</Text>
-              <Text style={styles.value} numberOfLines={1}>{display(item.quantity)} {display(item.fuelType, '')}</Text>
+              <Text style={styles.value} numberOfLines={1}>{display(formatNumber(item.quantity))} {display(item.fuelType, '')}</Text>
               <Text style={styles.date} numberOfLines={1}>{display(item.issuedDate)}</Text>
               <View style={[styles.statusDot, isReceived ? styles.statusDotDone : styles.statusDotPending]} />
               <View style={styles.divider} />
@@ -94,13 +95,13 @@ export default function FuelReceivedScreen() {
               <View style={styles.detailList}>
                 <DetailRow label="Asset Code" value={display(selected.assetCode)} />
                 <DetailRow label="Fuel Type" value={display(selected.fuelType)} />
-                <DetailRow label="Quantity" value={display(selected.quantity)} />
+                <DetailRow label="Quantity" value={display(formatNumber(selected.quantity))} />
                 <DetailRow label="Issue Code" value={display(selected.fuelIssueCode)} />
                 <DetailRow label="Issued Date" value={display(selected.issuedDate)} />
                 <DetailRow label="Project" value={display(selected.projectCode)} />
                 <DetailRow label="Issued By" value={display(selected.issuedBy)} />
                 <DetailRow label="Received By" value={display(selected.receivedBy)} />
-                <DetailRow label="Meter Reading" value={display(selected.meterReading)} />
+                <DetailRow label="Meter Reading" value={display(formatNumber(selected.meterReading))} />
                 <DetailRow label="Remarks" value={selected.remarks || 'No remarks'} />
               </View>
             ) : null}
