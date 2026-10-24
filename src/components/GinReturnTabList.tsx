@@ -5,6 +5,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { useAuth } from '../context/AuthContext';
 import PrimaryButton from './PrimaryButton';
 import { Gin, PaginatedResponse, StockReturn } from '../types';
+import { formatNumber } from '../utils/number';
 
 function display(value: unknown, fallback = '-') {
   return value === undefined || value === null || value === '' ? fallback : String(value);
@@ -206,7 +207,7 @@ export default function GinReturnTabList({
                     {selectedGin.items.map((lineItem, index) => (
                       <View key={lineItem.ginItemId ?? index} style={styles.itemRow}>
                         <Text style={styles.itemName}>{display(lineItem.description, lineItem.itemCode)}</Text>
-                        <Text style={styles.itemQty}>{display(lineItem.quantity)}</Text>
+                        <Text style={styles.itemQty}>{display(formatNumber(lineItem.quantity))}</Text>
                       </View>
                     ))}
                   </View>
@@ -249,7 +250,7 @@ export default function GinReturnTabList({
                     {selectedReturn.items.map((lineItem, index) => (
                       <View key={lineItem.stockReturnItemId ?? index} style={styles.itemRow}>
                         <Text style={styles.itemName}>{display(lineItem.description, lineItem.itemCode)}</Text>
-                        <Text style={styles.itemQty}>{display(lineItem.quantity)}</Text>
+                        <Text style={styles.itemQty}>{display(formatNumber(lineItem.quantity))}</Text>
                       </View>
                     ))}
                   </View>

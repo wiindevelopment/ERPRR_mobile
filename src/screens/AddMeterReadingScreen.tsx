@@ -10,6 +10,7 @@ import { useAuth } from '../context/AuthContext';
 import { getTodayYYYYMMDD } from '../utils/date';
 import { createMeterReading } from '../api/services';
 import { generateUuidV4 } from '../utils/uuid';
+import { formatNumber, formatNumberInput, parseNumberInput } from '../utils/number';
 
 const METER_TYPES = ['Odometer - km', 'Hour meter - hr'];
 
@@ -24,23 +25,23 @@ export default function AddMeterReadingScreen({ navigation }: NativeStackScreenP
   const readingDate = getTodayYYYYMMDD();
 
   const usageValue = useMemo(() => {
-    const current = Number(readingValue);
-    const previous = Number(previousReading);
+    const current = parseNumberInput(readingValue);
+    const previous = parseNumberInput(previousReading);
     if (!readingValue || !previousReading || Number.isNaN(current) || Number.isNaN(previous)) return 0;
     return current - previous;
   }, [readingValue, previousReading]);
 
   const readingError = useMemo(() => {
-    const current = Number(readingValue);
-    const previous = Number(previousReading);
+    const current = parseNumberInput(readingValue);
+    const previous = parseNumberInput(previousReading);
     if (!readingValue || !previousReading || Number.isNaN(current) || Number.isNaN(previous)) return null;
     if (current < previous) return 'Reading value cannot be less than the previous reading.';
     return null;
   }, [readingValue, previousReading]);
 
   const submit = async () => {
-    const current = Number(readingValue);
-    const previous = Number(previousReading);
+    const current = parseNumberInput(readingValue);
+    const previous = parseNumberInput(previousReading);
 
     if (!assetCodeId.trim() || !readingValue || Number.isNaN(current) || !previousReading || Number.isNaN(previous)) {
       Alert.alert('Check inputs', 'Select an asset code and enter valid reading and previous reading values.');
@@ -95,10 +96,10 @@ export default function AddMeterReadingScreen({ navigation }: NativeStackScreenP
           </View>
 
           <FormField label="Reading Date" value={readingDate} editable={false} />
-          <FormField label="Reading Value" placeholder="Enter current reading" keyboardType="decimal-pad" value={readingValue} onChangeText={setReadingValue} />
-          <FormField label="Previous Reading" placeholder="Enter previous reading" keyboardType="decimal-pad" value={previousReading} onChangeText={setPreviousReading} />
+          <FormField label="Reading Value" placeholder="Enter current reading" keyboardType="decimal-pad" value={readingValue} onChangeText={text => setReadingValue(formatNumberInput(text))} />
+          <FormField label="Previous Reading" placeholder="Enter previous reading" keyboardType="decimal-pad" value={previousReading} onChangeText={text => setPreviousReading(formatNumberInput(text))} />
           {readingError ? <Text style={styles.errorText}>{readingError}</Text> : null}
-          <FormField label="Usage Value (auto calculated)" value={String(usageValue)} editable={false} />
+          <FormField label="Usage Value (auto calculated)" value={formatNumber(usageValue)} editable={false} />
           <FormField label="Recorded By" value={user?.employeeCode ?? ''} editable={false} />
           <FormField label="Remarks" placeholder="Optional remarks" multiline numberOfLines={4} value={remarks} onChangeText={setRemarks} style={styles.remarksInput} textAlignVertical="top" />
 

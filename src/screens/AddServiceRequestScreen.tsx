@@ -6,7 +6,7 @@ import FormField from '../components/FormField';
 import KeyboardAwareScrollView from '../components/KeyboardAwareScrollView';
 import AssetCodeSelect from '../components/AssetCodeSelect';
 import DefectMultiSelect from '../components/DefectMultiSelect';
-import RequestTypeSelect from '../components/RequestTypeSelect';
+import RequestTypeSelect, { requiresDefect } from '../components/RequestTypeSelect';
 import PrimaryButton from '../components/PrimaryButton';
 import { useAuth } from '../context/AuthContext';
 import { createServiceRequest, getServiceRequestsByProject } from '../api/services';
@@ -40,9 +40,13 @@ export default function AddServiceRequestScreen({ navigation }: NativeStackScree
       Alert.alert('Request type required', 'Select a request type.');
       return;
     }
-    // Issues not on the defect list (and accidents) can be described in remarks instead.
+    if (!maintenanceWorks.length && requiresDefect(requestType)) {
+      Alert.alert('Defect required', 'Select at least one defect for a Faults request.');
+      return;
+    }
+    // Breakdowns and accidents not on the defect list can be described in remarks instead.
     if (!maintenanceWorks.length && !remarks.trim()) {
-      Alert.alert('Describe the issue', 'Select at least one defect, or describe the issue in Remarks.');
+      Alert.alert('Describe the issue', 'Select at least one defect, or describe the breakdown/accident in Remarks.');
       return;
     }
     if (!selectedProject?.projectCode) {
