@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import React, { useState } from 'react';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { FlatList, Modal, Pressable, SafeAreaView, StyleSheet, Text, View } from 'react-native';
+import { FlatList, Modal, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { RootStackParamList } from '../navigation/RootNavigator';
 import { useAuth } from '../context/AuthContext';
 import { AssignedProject } from '../types';
@@ -21,7 +21,7 @@ export default function HomeScreen({ navigation }: NativeStackScreenProps<RootSt
 
   return (
     <SafeAreaView style={styles.safe}>
-      <View style={styles.container}>
+      <ScrollView contentContainerStyle={styles.container}>
         <View style={styles.header}>
           <View style={styles.identity}>
             <View style={styles.avatar}>
@@ -71,6 +71,17 @@ export default function HomeScreen({ navigation }: NativeStackScreenProps<RootSt
           <Text style={styles.chevron}>›</Text>
         </Pressable>
 
+        <Pressable style={styles.actionCard} onPress={() => navigation.navigate('VehicleFuelLogs')}>
+          <View style={[styles.icon, styles.iconFuelLog]}>
+            <Ionicons name="water-outline" size={24} color="#A8341D" />
+          </View>
+          <View style={styles.actionTextWrap}>
+            <Text style={styles.actionTitle}>Vehicle Fuel Log</Text>
+            <Text style={styles.actionSubtitle}>Record fuel filled at a filling station</Text>
+          </View>
+          <Text style={styles.chevron}>›</Text>
+        </Pressable>
+
         <Pressable style={styles.actionCard} onPress={() => navigation.navigate('ItemReceived')}>
           <View style={[styles.icon, styles.iconFuel]}>
             <Ionicons name="cube-outline" size={24} color="#B9560F" />
@@ -103,7 +114,7 @@ export default function HomeScreen({ navigation }: NativeStackScreenProps<RootSt
           </View>
           <Text style={styles.chevron}>›</Text>
         </Pressable>
-      </View>
+      </ScrollView>
 
       <Modal visible={pickerVisible} animationType="slide" transparent onRequestClose={() => setPickerVisible(false)}>
         <Pressable style={styles.modalBackdrop} onPress={() => setPickerVisible(false)}>
@@ -140,7 +151,7 @@ export default function HomeScreen({ navigation }: NativeStackScreenProps<RootSt
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: '#F7F8FA' },
-  container: { flex: 1, padding: 20, gap: 14 },
+  container: { flexGrow: 1, padding: 20, gap: 14 },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 },
   identity: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   avatar: { width: 50, height: 50, borderRadius: 25, overflow: 'hidden', backgroundColor: '#E7F1ED' },
@@ -172,6 +183,7 @@ const styles = StyleSheet.create({
   icon: { width: 48, height: 48, borderRadius: 14, overflow: 'hidden', alignItems: 'center', justifyContent: 'center' },
   iconMeter: { backgroundColor: '#E7F1ED' },
   iconFuel: { backgroundColor: '#FBEAD9' },
+  iconFuelLog: { backgroundColor: '#FBE4DF' },
   iconService: { backgroundColor: '#E4EDF8' },
   iconGin: { backgroundColor: '#EFE7F8' },
   actionTextWrap: { flex: 1, gap: 3 },

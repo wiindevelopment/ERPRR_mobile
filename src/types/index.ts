@@ -38,6 +38,35 @@ export type MeterReading = {
   editedAt?: string;
 };
 
+export type FuelType = {
+  itemCodeId: number;
+  itemCodeCode: string;
+  itemCodeName: string;
+};
+
+export type VehicleFuelLog = {
+  vehicleFuelLogId?: string;
+  assetCode: string;
+  /** Employee code of the driver. */
+  driver: string;
+  /** Read-only, filled by the server on GET. */
+  driverName?: string;
+  fillingStationName: string;
+  fillingStationLocation?: string;
+  /** YYYY-MM-DD */
+  fuelDate: string;
+  /** Item code of the fuel, e.g. FLN-FUL-0001. */
+  fuelType: string;
+  fuelQuantity: number;
+  pricePerLiter: number;
+  totalAmount: number;
+  odometerReading?: number | null;
+  paymentMethod?: string;
+  remarks?: string;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
 export type ServiceRequest = {
   serviceRequestId?: string;
   serviceRequestCode?: string;

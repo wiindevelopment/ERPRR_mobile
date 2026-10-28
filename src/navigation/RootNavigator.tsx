@@ -6,6 +6,8 @@ import LoginScreen from '../screens/LoginScreen';
 import HomeScreen from '../screens/HomeScreen';
 import MeterReadingsScreen from '../screens/MeterReadingsScreen';
 import AddMeterReadingScreen from '../screens/AddMeterReadingScreen';
+import VehicleFuelLogsScreen from '../screens/VehicleFuelLogsScreen';
+import AddVehicleFuelLogScreen from '../screens/AddVehicleFuelLogScreen';
 import FuelReceivedScreen from '../screens/FuelReceivedScreen';
 import ItemReceivedScreen from '../screens/ItemReceivedScreen';
 import GoodsReceivedScreen from '../screens/GoodsReceivedScreen';
@@ -20,6 +22,8 @@ export type RootStackParamList = {
   Home: undefined;
   MeterReadings: undefined;
   AddMeterReading: undefined;
+  VehicleFuelLogs: undefined;
+  AddVehicleFuelLog: undefined;
   ItemReceived: undefined;
   FuelReceived: undefined;
   GoodsReceived: undefined;
@@ -61,6 +65,8 @@ export default function RootNavigator() {
           <Stack.Screen name="Home" component={HomeScreen} options={{ title: 'Operator App' }} />
           <Stack.Screen name="MeterReadings" component={MeterReadingsScreen} options={{ title: 'Meter Readings' }} />
           <Stack.Screen name="AddMeterReading" component={AddMeterReadingScreen} options={{ title: 'New Meter Reading' }} />
+          <Stack.Screen name="VehicleFuelLogs" component={VehicleFuelLogsScreen} options={{ title: 'Vehicle Fuel Log' }} />
+          <Stack.Screen name="AddVehicleFuelLog" component={AddVehicleFuelLogScreen} options={{ title: 'New Fuel Log' }} />
           <Stack.Screen name="ItemReceived" component={ItemReceivedScreen} options={{ title: 'Item Received' }} />
           <Stack.Screen name="FuelReceived" component={FuelReceivedScreen} options={{ title: 'Fuel Received' }} />
           <Stack.Screen name="GoodsReceived" component={GoodsReceivedScreen} options={{ title: 'Goods Received' }} />
