@@ -1,5 +1,5 @@
 import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
-import { Dimensions, Keyboard, KeyboardEvent, NativeScrollEvent, NativeSyntheticEvent, Platform, ScrollView, ScrollViewProps, TextInput } from 'react-native';
+import { Dimensions, Keyboard, KeyboardEvent, NativeScrollEvent, NativeSyntheticEvent, Platform, ScrollView, ScrollViewInstance, ScrollViewProps, TextInput } from 'react-native';
 
 // Android is edge-to-edge (Expo SDK 54+), so the OS no longer resizes the window for the
 // keyboard and KeyboardAvoidingView alone is not enough. We track the keyboard ourselves and
@@ -45,16 +45,16 @@ type Props = ScrollViewProps & {
   padForKeyboard?: boolean;
 };
 
-const KeyboardAwareScrollView = forwardRef<ScrollView, Props>(function KeyboardAwareScrollView(
+const KeyboardAwareScrollView = forwardRef<ScrollViewInstance, Props>(function KeyboardAwareScrollView(
   { extraOffset = 24, padForKeyboard = true, contentContainerStyle, onScroll, children, ...props },
   ref,
 ) {
-  const scrollRef = useRef<ScrollView>(null);
+  const scrollRef = useRef<ScrollViewInstance>(null);
   const offsetRef = useRef(0);
   const keyboardTopRef = useRef<number | null>(null);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
 
-  useImperativeHandle(ref, () => scrollRef.current as ScrollView);
+  useImperativeHandle(ref, () => scrollRef.current as ScrollViewInstance);
 
   const scrollToFocused = useCallback(() => {
     const keyboardTop = keyboardTopRef.current;

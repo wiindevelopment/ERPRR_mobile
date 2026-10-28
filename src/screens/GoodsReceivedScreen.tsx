@@ -75,7 +75,7 @@ export default function GoodsReceivedScreen() {
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(false); }} />}
         onEndReached={loadMore}
         onEndReachedThreshold={0.4}
-        ListFooterComponent={loadingMore ? <ActivityIndicator style={styles.footerLoader} /> : null}
+        ListFooterComponent={loadingMore ? <ActivityIndicator style={styles.footerLoader} /> : undefined}
         ListEmptyComponent={<Text style={styles.empty}>No goods have been issued to you.</Text>}
         renderItem={({ item }) => {
           const arrived = !!item.isArrivalGateVerified;

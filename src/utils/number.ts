@@ -18,13 +18,14 @@ export function formatNumber(value: unknown, fractionDigits?: number): string {
 
 /**
  * Reformats text as the user types it into a numeric field, e.g. "1234567.5" -> "1,234,567.5".
- * Keeps a trailing "." and any typed decimals so typing isn't disrupted.
+ * Keeps a trailing "." and any typed decimals so typing isn't disrupted;
+ * maxFractionDigits caps the decimals for fields the server stores at fixed precision.
  */
-export function formatNumberInput(text: string): string {
+export function formatNumberInput(text: string, maxFractionDigits?: number): string {
   const cleaned = text.replace(/[^\d.]/g, '');
   const dot = cleaned.indexOf('.');
   const whole = (dot === -1 ? cleaned : cleaned.slice(0, dot)).replace(/^0+(?=\d)/, '');
-  const fraction = dot === -1 ? null : cleaned.slice(dot + 1).replace(/\./g, '');
+  const fraction = dot === -1 ? null : cleaned.slice(dot + 1).replace(/\./g, '').slice(0, maxFractionDigits);
   const grouped = whole.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
   return fraction === null ? grouped : `${grouped || '0'}.${fraction}`;
 }

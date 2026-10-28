@@ -1,6 +1,6 @@
 import apiClient from './client';
 import { ENDPOINTS } from './config';
-import { FuelReceived, Gin, LoginResponse, MeterReading, OperatorAsset, PaginatedResponse, ServiceFaultType, ServiceRequest, StockReturn } from '../types';
+import { FuelReceived, FuelType, Gin, LoginResponse, MeterReading, OperatorAsset, PaginatedResponse, ServiceFaultType, ServiceRequest, StockReturn, VehicleFuelLog } from '../types';
 
 export async function login(username: string, password: string) {
   const response = await apiClient.post<LoginResponse>(ENDPOINTS.login, {
@@ -50,6 +50,34 @@ export async function getFuelReceived(employeeCode: string) {
 export async function markFuelAsReceived(fuelIssueId: string) {
   const response = await apiClient.put<FuelReceived>(
     ENDPOINTS.fuelIssueMarkReceived(fuelIssueId),
+  );
+  return response.data;
+}
+
+export async function getFuelTypes() {
+  const response = await apiClient.get<FuelType[]>(ENDPOINTS.fuelTypes);
+  return response.data;
+}
+
+export async function getVehicleFuelLogs(driver: string) {
+  const response = await apiClient.get<VehicleFuelLog[]>(
+    ENDPOINTS.vehicleFuelLogsByDriver(driver),
+  );
+  return response.data;
+}
+
+export async function createVehicleFuelLog(payload: VehicleFuelLog) {
+  const response = await apiClient.post<VehicleFuelLog>(
+    ENDPOINTS.vehicleFuelLogCreate,
+    payload,
+  );
+  return response.data;
+}
+
+export async function updateVehicleFuelLog(vehicleFuelLogId: string, payload: VehicleFuelLog) {
+  const response = await apiClient.put<VehicleFuelLog>(
+    ENDPOINTS.vehicleFuelLogUpdate(vehicleFuelLogId),
+    payload,
   );
   return response.data;
 }
