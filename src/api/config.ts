@@ -3,7 +3,7 @@
 // Use your computer/server LAN IP, e.g. http://192.168.1.20:8080
 export const API_BASE_URL = 'http://13.201.85.4:8080';
 //export const API_BASE_URL = 'http://ec2-3-7-70-139.ap-south-1.compute.amazonaws.com:8080';
-//export const API_BASE_URL = 'http://192.168.1.11:8080';
+//export const API_BASE_URL = 'http://192.168.1.15:8080';
 
 export const ENDPOINTS = {
   login: '/api/login',
@@ -21,6 +21,13 @@ export const ENDPOINTS = {
 
   fuelIssueMarkReceived: (fuelIssueId: string) =>
     `/api/fuel_issue/received/${encodeURIComponent(fuelIssueId)}`,
+
+  fuelTypes: '/api/item-codes/fuel-types',
+  vehicleFuelLogCreate: '/api/vehicle_fuel_log/',
+  vehicleFuelLogsByDriver: (driver: string) =>
+    `/api/vehicle_fuel_log/driver/${encodeURIComponent(driver)}`,
+  vehicleFuelLogUpdate: (vehicleFuelLogId: string) =>
+    `/api/vehicle_fuel_log/${encodeURIComponent(vehicleFuelLogId)}`,
 
   serviceFaultTypes: '/api/service-faults/types',
   serviceRequestCreate: '/api/service-request/',
